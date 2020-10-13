@@ -53,14 +53,14 @@ commands:
         - run: 
             name: "Grant Permissions" 
             command: mysql -uroot -proot -e "GRANT ALL PRIVILEGES ON *.* TO 'circleci'@'%';"
+
+
     setup_app:
       steps:
-        - run:
-            name: Wait for Database
-            command: dockerize -wait tcp://localhost:3306 -timeout 1m
-        - run: 
-            name: "Install mysql" 
-            command: sudo apt-get install mysql-client
+        - run: mix local.rebar --force
+        - run: mix local.hex --force
+        - run: mix do deps.get, compile --warnings-as-errors --all-warnings
+       
         
 # -------------------------
 #        EXECUTORS
@@ -79,6 +79,7 @@ jobs:
     steps:
       - checkout
       - setup_db
+      - setup_app
       #- run: sudo -uroot -proot -e "GRANT ALL PRIVILEGES ON *.* TO 'circleci'@'%';"
       # - run:
       #     name: Setup database
