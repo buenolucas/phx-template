@@ -1,0 +1,10 @@
+# Elixir official docker image tag '1.8.2' is compiled with Erlang 21 (elixir 1.8.2 / erl 21)
+# (see https://github.com/c0b/docker-elixir/blob/4122b4840bd762d1434424e1ec693929b0198c98/1.8/Dockerfile).
+#
+# In asdf, version '1.8.2' of elixir is precompiled with Erlang 20, thus the config below.
+
+erlang 21.3.8.6
+elixir 1.8.2-otp-21
+rust 1.43.1
+yarn 1.7.0
+nodejs 10.15.3
