@@ -33,6 +33,21 @@ defaults_frontend: &defaults_frontend
   docker:
     - image: circleci/node:10.16
 
+
+# -------------------------
+#        COMMANDS
+# -------------------------
+  
+commands:
+    setup_db:
+      steps:
+        - run:
+            name: Wait for Database
+            command: dockerize -wait tcp://localhost:3306 -timeout 1m
+        - run: 
+            name: "Install mysql" 
+            command: sudo apt-get install mysql-client
+        
 # -------------------------
 #        EXECUTORS
 # -------------------------
@@ -49,9 +64,8 @@ jobs:
     executor: arvore
     steps:
       - checkout
-      - run: mix setup
-      - run: sudo apt-get install mysql-client
-      - run: sudo -uroot -prootpw -e "GRANT ALL PRIVILEGES ON *.* TO 'circleci'@'%';"
+      - setup_db
+      #- run: sudo -uroot -prootpw -e "GRANT ALL PRIVILEGES ON *.* TO 'circleci'@'%';"
       # - run:
       #     name: Setup database
       #     command: |
