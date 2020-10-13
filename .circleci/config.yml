@@ -48,11 +48,8 @@ commands:
             name: "Install mysql" 
             command: sudo apt-get install mysql-client
         - run: 
-            name: "Install mysql" 
-            command: sudo apt-get install mysql-client
-        - run: 
             name: "Grant Permissions" 
-            command: mysql -uroot -proot -e "GRANT ALL PRIVILEGES ON *.* TO 'circleci'@'%';"
+            command: sudo mysql -uroot -proot -e "GRANT ALL PRIVILEGES ON *.* TO 'circleci'@'%';"
 
 
     setup_app:
