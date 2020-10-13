@@ -76,10 +76,10 @@ jobs:
           name: Setup database
           command: |
             sudo mysql -h 127.0.0.1 -uroot -prootpw -e "GRANT ALL PRIVILEGES ON *.* TO 'circleci'@'%';"
-            sudo mysql -h 127.0.0.1 -uroot -prootpw -e "CREATE DATABASE IF NOT EXISTS bookstore_test;"
-            mysql -h 127.0.0.1 -u circleci -pcircleci bookstore_test < priv/repo/structure.sql
-            mysql -h 127.0.0.1 -u circleci -pcircleci -e "CREATE TABLE bookstore_test.processed_viewed_books_wpm LIKE bookstore_test.processed_viewed_books;"
-            mix ecto.migrate
+         #   sudo mysql -h 127.0.0.1 -uroot -prootpw -e "CREATE DATABASE IF NOT EXISTS bookstore_test;"
+         #   mysql -h 127.0.0.1 -u circleci -pcircleci bookstore_test < priv/repo/structure.sql
+         #   mysql -h 127.0.0.1 -u circleci -pcircleci -e "CREATE TABLE bookstore_test.processed_viewed_books_wpm LIKE bookstore_test.processed_viewed_books;"
+         #   mix ecto.migrate
             
       - save_cache:
           key: v1-build-cache-{{ checksum "mix.lock" }}
