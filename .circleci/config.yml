@@ -42,10 +42,24 @@ executors:
     docker:
       - image: circleci/elixir:1.8.2-node
       - image: circleci/mysql:8.0.17
-        command: --default-authentication-plugin=mysql_native_password --sql-mode="NO_ENGINE_SUBSTITUTION"
 
 jobs:
   setup:
+    <<: *defaults
+    executor: arvore
+    steps:
+      - checkout
+      - run: mix setup
+      - run: sudo apt-get install mysql-client
+      - run: sudo -uroot -prootpw -e "GRANT ALL PRIVILEGES ON *.* TO 'circleci'@'%';"
+      # - run:
+      #     name: Setup database
+      #     command: |
+      #       sudo mysql -h 127.0.0.1 -uroot -prootpw -e "GRANT ALL PRIVILEGES ON *.* TO 'circleci'@'%';"
+      #       sudo mysql -h 127.0.0.1 -uroot -prootpw -e "CREATE DATABASE IF NOT EXISTS bookstore_test;"
+      #       mysql -h 127.0.0.1 -u circleci -pcircleci bookstore_test < priv/repo/structure.sql
+      #       mix ecto.migrate
+  setup3:
     executor: arvore
     steps:
       - checkout
@@ -72,14 +86,16 @@ jobs:
           command: |
             sudo apt-get update
             sudo apt-get install mysql-client
-      - run:
-          name: Setup database
-          command: |
-            sudo mysql -h 127.0.0.1 -uroot -prootpw -e "GRANT ALL PRIVILEGES ON *.* TO 'circleci'@'%';"
-         #   sudo mysql -h 127.0.0.1 -uroot -prootpw -e "CREATE DATABASE IF NOT EXISTS bookstore_test;"
-         #   mysql -h 127.0.0.1 -u circleci -pcircleci bookstore_test < priv/repo/structure.sql
-         #   mysql -h 127.0.0.1 -u circleci -pcircleci -e "CREATE TABLE bookstore_test.processed_viewed_books_wpm LIKE bookstore_test.processed_viewed_books;"
-         #   mix ecto.migrate
+      - run: Create Database
+      
+      # - run:
+      #     name: Setup database
+      #     command: |
+      #       sudo mysql -h 127.0.0.1 -uroot -prootpw -e "GRANT ALL PRIVILEGES ON *.* TO 'circleci'@'%';"
+      #    #   sudo mysql -h 127.0.0.1 -uroot -prootpw -e "CREATE DATABASE IF NOT EXISTS bookstore_test;"
+      #    #   mysql -h 127.0.0.1 -u circleci -pcircleci bookstore_test < priv/repo/structure.sql
+      #    #   mysql -h 127.0.0.1 -u circleci -pcircleci -e "CREATE TABLE bookstore_test.processed_viewed_books_wpm LIKE bookstore_test.processed_viewed_books;"
+      #    #   mix ecto.migrate
             
       - save_cache:
           key: v1-build-cache-{{ checksum "mix.lock" }}
@@ -220,12 +236,12 @@ workflows:
   tests:
     jobs:
       - setup
-  continuous_integration:
-    jobs:
-      - build_backend
-      - code_analysis_backend:
-          requires:
-            - build_backend
-      - unit_tests_backend:
-          requires:
-            - build_backend
+  # continuous_integration:
+  #   jobs:
+  #     - build_backend
+  #     - code_analysis_backend:
+  #         requires:
+  #           - build_backend
+  #     - unit_tests_backend:
+  #         requires:
+  #           - build_backend
