@@ -4,7 +4,7 @@ use Mix.Config
 config :phx_template, PhxTemplate.Repo,
   username: "root",
   password: "rootpw",
-  database: "phx_template_dev",
+  database: "bookstore_test",
   hostname: "localhost",
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
