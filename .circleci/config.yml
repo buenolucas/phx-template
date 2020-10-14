@@ -242,13 +242,13 @@ workflows:
   version: 2
   tests:
     jobs:
-      - setup
-  continuous_integration:
-    jobs:
-      - build_backend
-      # - code_analysis_backend:
-      #     requires:
-      #       - build_backend
-      - unit_tests_backend:
-          requires:
-            - build_backend
+      - check
+  # continuous_integration:
+  #   jobs:
+  #     - build_backend
+  #     # - code_analysis_backend:
+  #     #     requires:
+  #     #       - build_backend
+  #     - unit_tests_backend:
+  #         requires:
+  #           - build_backend
