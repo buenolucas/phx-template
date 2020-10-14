@@ -67,7 +67,10 @@ commands:
       steps:
         - run:
             name: Mix Setup
-            command: mix setup
+            command: |
+              mix ecto.create
+              mix ecto.load
+              mix ecto.migrate
 
     
        
@@ -80,6 +83,7 @@ executors:
     <<: *defaults
     docker:
       - image: circleci/elixir:1.8.2-node
+      - image: circleci/mysql:8.0.17
       - image: circleci/mysql:8.0.17
         command: --default-authentication-plugin=mysql_native_password --sql-mode="NO_ENGINE_SUBSTITUTION"
 
