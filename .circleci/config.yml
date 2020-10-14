@@ -61,7 +61,13 @@ commands:
             command: mysql -h 127.0.0.1 -uroot -prootpw -e "GRANT ALL PRIVILEGES ON *.* TO 'circleci'@'%';"
         - run: 
             name: "Echo" 
-            command: echo consegui caramba"
+            command: echo consegui caramba
+    
+    mix_setup:
+      steps:
+        - run:
+            name: Mix Setup
+            command: mix setup
 
     
        
@@ -90,7 +96,8 @@ jobs:
             curl https://sh.rustup.rs | sh -s -- -y
             echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> $BASH_ENV
       - setup_app
-      - setup_db
+      - setup_db 
+      - mix_setup 
 
   #backenbd   
   build_backend:
