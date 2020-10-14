@@ -162,10 +162,6 @@ jobs:
             mysql -h 127.0.0.1 -u circleci -pcircleci bookstore_test < priv/repo/structure.sql            
             mix ecto.migrate
             echo "DENTRO"
-      - run:
-          name: Run Tests
-          command: mix coveralls.html --raise --exclude bookwire_ftp --exclude aws_upload --exclude ignore_temporary
-
       - save_cache:
           key: v1-tests-{{ .Branch }}-{{ checksum "mix.lock" }}
           paths:
