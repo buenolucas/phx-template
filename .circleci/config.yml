@@ -72,13 +72,13 @@ executors:
     docker:
       - image: circleci/elixir:1.8.2-node
       - image: circleci/mysql:8.0.17
+        command: --default-authentication-plugin=mysql_native_password --sql-mode="NO_ENGINE_SUBSTITUTION"
 
 
 jobs:
   #setup
   setup:
-    <<: *defaults
-    executor: arvore
+    <<: *defaults_backend
     steps:
       - checkout
       - setup_app
