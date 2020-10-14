@@ -103,6 +103,7 @@ jobs:
             sudo mysql -h 127.0.0.1 -uroot -prootpw -e "CREATE DATABASE IF NOT EXISTS bookstore_test;"
             mysql -h 127.0.0.1 -u circleci -pcircleci bookstore_test < priv/repo/structure.sql            
             mix ecto.migrate
+            echo "DENTRO"
       - run:
           name: Run Tests
           command: mix coveralls.html --raise --exclude bookwire_ftp --exclude aws_upload --exclude ignore_temporary
@@ -145,9 +146,9 @@ workflows:
   continuous_integration:
     jobs:
       - build_backend
-      - code_analysis_backend:
-          requires:
-            - build_backend
+      # - code_analysis_backend:
+      #     requires:
+      #       - build_backend
       - unit_tests_backend:
           requires:
             - build_backend
