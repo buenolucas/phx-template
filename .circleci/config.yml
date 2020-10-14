@@ -102,7 +102,7 @@ jobs:
     steps:
       - checkout
       - run: pwd
-      - run: ls
+      - run: ls /home/circleci/arvore
   setup:
     <<: *defaults_backend
     steps:
