@@ -38,6 +38,16 @@ defaults_frontend: &defaults_frontend
 # -------------------------
   
 commands:
+
+    setup_app:
+      steps:
+        - run:
+            name: Setup App 
+            command: | 
+              mix local.rebar --force
+              mix local.hex --force
+              mix do deps.get, compile --warnings-as-errors --all-warnings
+
     setup_db:
       steps:
         - run:
@@ -53,14 +63,7 @@ commands:
             name: "Echo" 
             command: echo consegui caramba"
 
-    setup_app:
-      steps:
-        - run:
-            name: Setup App 
-            command: | 
-              mix local.rebar --force
-              mix local.hex --force
-              mix do deps.get, compile --warnings-as-errors --all-warnings
+    
        
         
 # -------------------------
@@ -81,6 +84,11 @@ jobs:
     <<: *defaults_backend
     steps:
       - checkout
+      - run: # TODO: put rust in the image instead of installing every time
+          name: Install Rust
+          command: |
+            curl https://sh.rustup.rs | sh -s -- -y
+            echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> $BASH_ENV
       - setup_app
       - setup_db
 
