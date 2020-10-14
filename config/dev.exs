@@ -2,8 +2,8 @@ use Mix.Config
 
 # Configure your database
 config :phx_template, PhxTemplate.Repo,
-  username: "circleci",
-  password: "circleci",
+  username: "root",
+  password: "rootpw",
   database: "phx_template_dev",
   hostname: "localhost",
   show_sensitive_data_on_connection_error: true,
