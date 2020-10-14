@@ -72,12 +72,16 @@ executors:
 
 
 jobs:
+  #setup
   setup:
     <<: *defaults
     executor: arvore
     steps:
       - checkout
+      - setup_app
       - setup_db
+
+  #backenbd   
   build_backend:
     <<: *defaults_backend
     steps:
