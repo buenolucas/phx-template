@@ -1,5 +1,19 @@
 version: 2.1
 
+# -------------------------
+#        DEFAULTS
+# -------------------------
+
+
+defaults: &defaults
+  working_directory: ~/arvore    
+  environment:
+    MIX_ENV: dev
+    MYSQL_ROOT_PASSWORD: rootpw
+    MYSQL_DATABASE: bookstore_test
+    MYSQL_USER: circleci
+    MYSQL_PASSWORD: circleci
+
 defaults_backend: &defaults_backend
   working_directory: ~/arvore
   docker:
@@ -19,7 +33,51 @@ defaults_frontend: &defaults_frontend
   docker:
     - image: circleci/node:10.16
 
+# -------------------------
+#        COMMANDS
+# -------------------------
+  
+commands:
+    setup_db:
+      steps:
+        - run:
+            name: Wait for Database
+            command: dockerize -wait tcp://localhost:3306 -timeout 1m
+        - run: 
+            name: "Install mysql" 
+            command: sudo apt-get install mysql-client
+        - run: 
+            name: "Grant Permissions" 
+            command: mysql -uroot -prootpw -e "GRANT ALL PRIVILEGES ON *.* TO 'circleci'@'%';"
+        - run: 
+            name: "Echo" 
+            command: echo consegui caramba"
+
+    setup_app:
+      steps:
+        - run: mix local.rebar --force
+        - run: mix local.hex --force
+        - run: mix do deps.get, compile --warnings-as-errors --all-warnings
+       
+        
+# -------------------------
+#        EXECUTORS
+# -------------------------
+executors:
+  arvore:
+    <<: *defaults
+    docker:
+      - image: circleci/elixir:1.8.2-node
+      - image: circleci/mysql:8.0.17
+
+
 jobs:
+  setup:
+    <<: *defaults
+    executor: arvore
+    steps:
+      - checkout
+      - setup_db
   build_backend:
     <<: *defaults_backend
     steps:
@@ -143,6 +201,9 @@ jobs:
 
 workflows:
   version: 2
+  tests:
+    jobs:
+      - setup
   continuous_integration:
     jobs:
       - build_backend
