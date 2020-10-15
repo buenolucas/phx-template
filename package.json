@@ -1,0 +1,30 @@
+{
+  "name": "phx-template",
+  "version": "1.0.0",
+  "description": "[![CircleCI](https://circleci.com/gh/buenolucas/phx-template/main.svg?style=svg&circle-token=0df651a8c02974bc1543d24b5187ac54da936bca)](https://circleci.com/gh/arvoreeducacao/arvore/tree/master) [![SourceLevel](https://app.sourcelevel.io/badges/hhP7EQzkPvB8HJQZuqkMESrB.svg)](https://app.sourcelevel.io/github/arvoreeducacao/arvore)",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "cypress:test": "cypress run -s 'cypress/integration/**/*-spec.js'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/buenolucas/phx-template.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/buenolucas/phx-template/issues"
+  },
+  "homepage": "https://github.com/buenolucas/phx-template#readme",
+  "devDependencies": {
+    "cypress": "^5.3.0"
+  }
+}
