@@ -70,9 +70,8 @@ jobs:
       - run:
           name: Waiting app...
           command: |
-            for i in `seq 1 50`;
+            for i in `seq 1 100`;
             do
-              echo "... $i"
               nc -z localhost 5000 && echo Success && exit 0
               echo -n .
               sleep 1
