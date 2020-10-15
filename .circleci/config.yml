@@ -26,10 +26,7 @@ defaults: &defaults
 defaults_backend: &defaults_backend
   working_directory: ~/arvore
   docker:
-    - image: buenolucas/phx #circleci/elixir:1.8.2-node
-      auth:
-          username: buenolucasbr
-          password: navehub1010
+    - image: buenolucasbr/phx #circleci/elixir:1.8.2-node
       environment:
         MIX_ENV: circle_ci_test
     - image: circleci/mysql:8.0.17
