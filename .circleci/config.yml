@@ -1,6 +1,15 @@
 version: 2.1
 
 # -------------------------
+#        ORBS
+# -------------------------
+#orbs:
+  # import Cypress orb by specifying an exact version x.y.z
+  # or the latest version 1.x.x using "@1" syntax
+  #cypress: cypress-io/cypress@1
+
+
+# -------------------------
 #        DEFAULTS
 # -------------------------
 
@@ -8,7 +17,7 @@ version: 2.1
 defaults: &defaults
   working_directory: ~/arvore    
   environment:
-    MIX_ENV: dev
+    MIX_ENV: circle_ci_test
     MYSQL_ROOT_PASSWORD: root
     MYSQL_DATABASE: bookstore_test
     MYSQL_USER: circleci
@@ -17,9 +26,12 @@ defaults: &defaults
 defaults_backend: &defaults_backend
   working_directory: ~/arvore
   docker:
-    - image: circleci/elixir:1.8.2
+    - image: buenolucas/phx #circleci/elixir:1.8.2-node
+      auth:
+          username: buenolucasbr
+          password: navehub1010
       environment:
-        MIX_ENV: dev
+        MIX_ENV: circle_ci_test
     - image: circleci/mysql:8.0.17
       command: --default-authentication-plugin=mysql_native_password --sql-mode="NO_ENGINE_SUBSTITUTION"
       environment:
@@ -38,16 +50,45 @@ defaults_frontend: &defaults_frontend
 # -------------------------
   
 commands:
-
+  
+    restore_cache_checkout:
+      parameters:
+        checkout_type:
+          type: string
+          default: node
+      steps:
+        - restore_cache:
+            key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}-<< parameters.checkout_type >>
+            
+    vars:
+      steps:
+        - run: pwd
+        - run: node --version
+        - run: ls -ln
+        - run: echo $HOME
+        - run: ls $HOME  -ln
+        - run: ls $HOME/arvore  -ln
+        
+   
     setup_app:
       steps:
+        - restore_cache:
+            keys:
+              - v1-build-cache-{{ checksum "mix.lock" }}
+              - v1-build-cache-
         - run:
-            name: Setup App 
+            name: Setup Elixir App 
             command: | 
               mix local.rebar --force
               mix local.hex --force
               mix do deps.get, compile --warnings-as-errors --all-warnings
-
+        - save_cache:
+            key: v1-build-cache-{{ checksum "mix.lock" }}
+            paths:
+              - deps
+              - _build
+              - ~/.mix
+  
     setup_db:
       steps:
         - run:
@@ -71,18 +112,41 @@ commands:
               mix ecto.create
               mix ecto.load
               mix ecto.migrate
-    test_seed:
+
+    install_cypress:
+      steps:
+        - run: echo "Install Cypress" 
+          
+          
+    install_rust:
       steps:
         - run:
-            name: Mix Setup
+            name: Install Rust
             command: |
-              mix ecto.create
-              mix ecto.load
-              mix ecto.migrate          
+              curl https://sh.rustup.rs | sh -s -- -y
+              echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> $BASH_ENV
 
+    install_js:
+      parameters:
+          package:
+            type: string
+          dir: 
+            type: string
+            default: ~/
+      steps:
+        - restore_cache:
+            keys:
+              - npm-cache-<< parameters.package >>-{{ checksum "package-lock.json" }}
+              - npm-cache-<< parameters.package >>
+        - run:
+            name: "NPM: Install << parameters.package >> Dependencies on  << parameters.dir >>/node_modules"
+            command: |
+              cd << parameters.dir >> && npm install
+        - save_cache:
+            paths:
+              - << parameters.dir >>/node_modules
+            key: npm-cache-<< parameters.package >>-{{ checksum "package-lock.json" }}
     
-       
-        
 # -------------------------
 #        EXECUTORS
 # -------------------------
@@ -93,164 +157,192 @@ executors:
       - image: circleci/elixir:1.8.2-node
       - image: circleci/mysql:8.0.17
         command: --default-authentication-plugin=mysql_native_password --sql-mode="NO_ENGINE_SUBSTITUTION"
-
+  builder:
+    docker:
+      - image: circleci/elixir:1.8.2-node
+      - image: circleci/mysql:8.0.17
+    working_directory: ~/project
+# -------------------------
+#        JOBS
+# -------------------------
 
 jobs:
-  #setup
-  check: 
-    <<: *defaults_backend
-    steps:
-      - checkout
-      - run: pwd
-      - run: cd ~ && pwd
-      - run: ls /home/circleci/arvore
+  ############
+  # setup
+  ############
   setup:
     <<: *defaults_backend
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - v1-build-cache-{{ checksum "mix.lock" }}
-            - v1-build-cache-
-      - run: # TODO: put rust in the image instead of installing every time
-          name: Install Rust
-          command: |
-            curl https://sh.rustup.rs | sh -s -- -y
-            echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> $BASH_ENV
+      - install_rust
       - setup_app
-      - setup_db 
-      - mix_setup 
-
-
-  #backenbd   
-  build_backend:
-    <<: *defaults_backend
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - v1-build-cache-{{ checksum "mix.lock" }}
-            - v1-build-cache-
-      - run: # TODO: put rust in the image instead of installing every time
-          name: Install Rust
-          command: |
-            curl https://sh.rustup.rs | sh -s -- -y
-            echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> $BASH_ENV
-      - run:
-          name: Build Application
-          command: |
-            mix local.rebar --force
-            mix local.hex --force
-            mix do deps.get, compile --warnings-as-errors --all-warnings
-      - save_cache:
-          key: v1-build-cache-{{ checksum "mix.lock" }}
-          paths:
-            - deps
-            - _build
-            - ~/.mix
       - persist_to_workspace:
           root: ~/
           paths:
             - arvore
-            - .mix
 
-  code_analysis_backend:
+  ############
+  # setup
+  ############
+  setup_env:
     <<: *defaults_backend
     steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - v1-dialyzer-cache-{{ checksum "mix.lock" }}
-            - v1-dialyzer-cache-{{ .Branch }}-
-            - v1-dialyzer-cache-
-      - run: # TODO: put rust in the image instead of installing every time
-          name: Install Rust
-          command: |
-            curl https://sh.rustup.rs | sh -s -- -y
-            echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> $BASH_ENV
       - attach_workspace:
           at: ~/
+      - checkout
+      - install_rust
+      - setup_app
+      - vars
+      - run: sudo apt-get install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
+      - run: cd ~/arvore
+      - run: npm install
+      - run: ls -la
+      - run: ls ~/.cache
+      - run: ls ~/.npm
+      - run: npm run cypress:run
+      # - install_js:
+      #     package: assets
+      #     dir: ~/arvore/assets
+      # - install_js:
+      #     package: frontend
+      #     dir: ~/arvore/frontend
+      # - install_js:
+      #     package: cypress
+      #     dir: ~/arvore
+      # - persist_to_workspace:
+      #     root: ~/
+      #     paths:
+      #       - arvore
+  ############
+  # setup_js
+  ############
+  setup_js:
+    <<: *defaults_backend
+
+    parameters:
+      package: 
+        type: string
+        default: cypress
+      dir: 
+        type: string
+        default: ~/
+    steps:
+      - attach_workspace:
+          at: ~/
+      - checkout
+      - install_js:
+          package: << parameters.package >>
+          dir: << parameters.dir >>
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - arvore
+  
+            
+  ############
+  # backend_unit_tests
+  ############
+  backend_unit_tests:
+    <<: *defaults_backend
+    steps:
+      - attach_workspace:
+          at: ~/
+      - restore_cache:
+          keys:
+            - v1-build-cache-{{ checksum "mix.lock" }}
+            - v1-build-cache-
+      - setup_db 
+      - mix_setup
+
+  ############
+  # code_analysis
+  ############
+  code_analysis:
+    <<: *defaults_backend
+    steps:
+      - attach_workspace:
+          at: ~/
+      - install_rust
+      - setup_app
       - run:
           name: Run Formatter
           command: mix format --check-formatted
-      # TODO: add credo
-      # TODO: add dialyzer
 
-  unit_tests_backend:
+  ############
+  # frontend_unit_tests
+  ############
+  frontend_unit_tests:
     <<: *defaults_backend
     steps:
       - attach_workspace:
           at: ~/
-      - restore_cache:
-          keys:
-            - v1-tests-{{ .Branch }}-{{ checksum "mix.lock" }}
-            - v1-tests-{{ .Branch }}-
-            - v1-tests-
-      - run: # TODO: put rust in the image instead of installing every time
-          name: Install Rust
-          command: |
-            curl https://sh.rustup.rs | sh -s -- -y
-            echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> $BASH_ENV
-      - run:
-          name: Wait for Database
-          command: dockerize -wait tcp://localhost:3306 -timeout 1m
-      - run: # TODO: put mysql in the image instead of installing every time
-          name: Install MySQL Client
-          command: |
-            sudo apt-get update
-            sudo apt-get install mysql-client
-      - run:
-          name: Setup database
-          command: |
-            sudo mysql -h 127.0.0.1 -uroot -proot -e "GRANT ALL PRIVILEGES ON *.* TO 'circleci'@'%';"
-            sudo mysql -h 127.0.0.1 -uroot -proot -e "CREATE DATABASE IF NOT EXISTS bookstore_test;"
-            mysql -h 127.0.0.1 -u circleci -pcircleci bookstore_test < priv/repo/structure.sql            
-            mix ecto.migrate
-            echo "DENTRO"
-      - save_cache:
-          key: v1-tests-{{ .Branch }}-{{ checksum "mix.lock" }}
-          paths:
-            - _build
-      - store_test_results:
-          path: _build/circle_ci_test/lib/arvore
+      - run: cd frontend && npm run test -- -u
 
-  unit_tests_frontend:
-    <<: *defaults_frontend
-    steps:
-      - checkout
-      # TODO: cache front end dependencies
-      - run:
-          name: Run tests
-          command: |
-            cd frontend
-            npm install
-            npm run test -- -u
-
-  end_to_end_cypress:
+  
+  ############
+  # end_to_end_tests
+  ############
+  frontend_end_to_end_tests:
     <<: *defaults_backend
     steps:
-      - checkout
-      # TODO: cache front end dependencies
       - run:
-          name: Run cypress tests
-          command: |
-            npm install
-            mix phx.server -i
-            npm run cypress:run
+            name: Setup Elixir App 
+            command: | 
+              mix local.rebar --force
+              mix local.hex --force
+              mix do deps.get, compile --warnings-as-errors --all-warnings
+      
+      - run:  npm run cypress:run
 
-  # TODO: add static code analysis to frontend
+  ############
+  # cypress_setup
+  ############
+  cypress_setup:
+    <<: *defaults_backend
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:  npm run cypress:run
 
 workflows:
   version: 2
   tests:
     jobs:
-      - check
-  # continuous_integration:
-  #   jobs:
-  #     - build_backend
-  #     # - code_analysis_backend:
-  #     #     requires:
-  #     #       - build_backend
-  #     - unit_tests_backend:
-  #         requires:
-  #           - build_backend
+      # - cypress_setup
+        - setup_env
+      # - setup
+      # - setup_js:
+      #     name: setup_assets
+      #     package: assets
+      #     dir: ~/arvore/assets
+      #     requires:
+      #         - setup
+      # - setup_js:
+      #     name: setup_frontend
+      #     package: frontend
+      #     dir: ~/arvore/frontend
+      #     requires:
+      #         - setup
+      # - setup_js:
+      #     name: setup_cypress
+      #     package: cypress
+      #     dir: ~/arvore
+      #     requires:
+      #         - setup
+
+      # - code_analysis:
+      #     requires:
+      #         - setup_env  
+
+      # - backend_unit_tests:
+      #     requires:
+      #         - setup_env
+
+      # - frontend_unit_tests:
+      #     requires:
+      #         - setup_env
+              
+      # - frontend_end_to_end_tests:
+      #     requires:
+      #         - setup_env
+          
