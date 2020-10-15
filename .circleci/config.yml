@@ -61,7 +61,37 @@ jobs:
       - run: mix ecto.load
       - run: mix ecto.migrate
       
-      
+      #
+      # assets
+      #
+      - restore_cache:
+          keys:
+            - v1-assets-cache-{{ .Branch }}-{{ checksum "assets/package-lock.json" }}
+            - v1-assets-cache-{{ .Branch }}
+            - v1-assets-cache
+      - run: cd assets && npm install
+      - save_cache:
+          key: v1-cypress-cache-{{ .Branch }}-{{ checksum "package-lock.json" }}
+          paths: 
+            - node_modules
+
+      #
+      # frontend
+      #
+      - restore_cache:
+          keys:
+            - v1-frontend-cache-{{ .Branch }}-{{ checksum "frontend/package-lock.json" }}
+            - v1-frontend-cache-{{ .Branch }}
+            - v1-frontend-cache
+      - run: cd frontend && npm install
+      - save_cache:
+          key: v1-frontend-cache-{{ .Branch }}-{{ checksum "frontend/package-lock.json" }}
+          paths: 
+            - frontend/node_modules
+
+      #
+      # cypress
+      #
       - restore_cache:
           keys:
             - v1-cypress-cache-{{ .Branch }}-{{ checksum "package-lock.json" }}
@@ -77,6 +107,7 @@ jobs:
           key: v1-cypress-cache-{{ .Branch }}-{{ checksum "package-lock.json" }}
           paths: 
             - node_modules
+            - .cache/Cypress
 
       - run:
           name: Sun Server
