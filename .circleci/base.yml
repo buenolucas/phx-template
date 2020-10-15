@@ -2,21 +2,21 @@ version: 2
 jobs:
   build:
     parallelism: 1
-    working_directory: ~/arvore
     docker:
-      - image: buenolucasbr/cimg-phx
+      - image: circleci/elixir:1.8.2-node
         environment:
-          MIX_ENV: dev
-      - image: circleci/mysql:8.0.17
-        command: --default-authentication-plugin=mysql_native_password --sql-mode="NO_ENGINE_SUBSTITUTION"
+          MIX_ENV: test
+      - image: circleci/postgres:10.1-alpine
         environment:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: bookstore_test
-          MYSQL_USER: circleci
-          MYSQL_PASSWORD: circleci
+          POSTGRES_USER: postgres
+          POSTGRES_DB: app_test
+          POSTGRES_PASSWORD: ""
+
+    working_directory: ~/app
 
     steps:
       - checkout
+
       - run: mix local.hex --force
       - run: mix local.rebar --force
 
@@ -29,6 +29,11 @@ jobs:
           keys:
             - v1-build-cache-{{ .Branch }}
             - v1-build-cache
+      - run:
+            name: Install Rust
+            command: |
+              curl https://sh.rustup.rs | sh -s -- -y
+              echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> $BASH_ENV
 
       - run: mix do deps.get, compile --warnings-as-errors --all-warnings
       - save_cache:
@@ -54,10 +59,8 @@ jobs:
 
       - run:
           name: Wait for DB
-          command: dockerize -wait tcp://localhost:3306 -timeout 1m
+          command: dockerize -wait tcp://localhost:5432 -timeout 1m
 
-      - run: mix ecto.create
-      - run: mix ecto.migrate
       - run: mix test
 
       - store_test_results:
