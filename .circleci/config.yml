@@ -62,7 +62,7 @@ jobs:
       - run:
           name: Sun Server
           command: elixir --erl "-detached" -S mix phx.server
-      - run: apt-get install -y  net-tools
+      - run: sudo apt-get install -y  net-tools
       - run: nc -z localhost 5000 && echo Success && exit 0
       - run:
           name: Waiting app...
