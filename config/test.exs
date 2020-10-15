@@ -6,9 +6,10 @@ use Mix.Config
 # to provide built-in test partitioning in CI environment.
 # Run `mix help test` for more information.
 config :phx_template, PhxTemplate.Repo,
-  username: "root",
-  password: "",
-  database: "phx_template_test#{System.get_env("MIX_TEST_PARTITION")}",
+  username: "circleci",
+  password: "circleci",
+  #database: "phx_template_test#{System.get_env("MIX_TEST_PARTITION")}",
+  database: "bookstore_test",
   hostname: "localhost",
   pool: Ecto.Adapters.SQL.Sandbox
 
