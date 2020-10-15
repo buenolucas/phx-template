@@ -17,8 +17,6 @@ jobs:
 
     steps:
       - checkout
-      - run: ls ~/
-      - run: ls ~/arvore
       - run: mix local.hex --force
       - run: mix local.rebar --force
 
@@ -31,8 +29,6 @@ jobs:
           keys:
             - v1-build-cache-{{ .Branch }}
             - v1-build-cache
-      - run: ls ~/home
-      - run: ls ~/home/arvore
 
       - run: mix do deps.get, compile --warnings-as-errors --all-warnings
       - save_cache:
