@@ -169,10 +169,9 @@ jobs:
   # setup
   ############
   setup:
-    executor: phx
+    executor: arvore
     steps:
       - checkout
-      - run: cd ~/arvore && asdf install
       - setup_app
       - persist_to_workspace:
           root: ~/
