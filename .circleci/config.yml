@@ -169,7 +169,8 @@ jobs:
   # setup
   ############
   setup:
-    <<: *defaults_backend
+    #<<: *defaults_backend
+    executor: arvore
     steps:
       - checkout
       - setup_app
@@ -197,19 +198,6 @@ jobs:
       - run: ls ~/.cache
       - run: ls ~/.npm
       - run: npm run cypress:run
-      # - install_js:
-      #     package: assets
-      #     dir: ~/arvore/assets
-      # - install_js:
-      #     package: frontend
-      #     dir: ~/arvore/frontend
-      # - install_js:
-      #     package: cypress
-      #     dir: ~/arvore
-      # - persist_to_workspace:
-      #     root: ~/
-      #     paths:
-      #       - arvore
   ############
   # setup_js
   ############
@@ -235,71 +223,6 @@ jobs:
           paths:
             - arvore
   
-            
-  ############
-  # backend_unit_tests
-  ############
-  backend_unit_tests:
-    <<: *defaults_backend
-    steps:
-      - attach_workspace:
-          at: ~/
-      - restore_cache:
-          keys:
-            - v1-build-cache-{{ checksum "mix.lock" }}
-            - v1-build-cache-
-      - setup_db 
-      - mix_setup
-
-  ############
-  # code_analysis
-  ############
-  code_analysis:
-    <<: *defaults_backend
-    steps:
-      - attach_workspace:
-          at: ~/
-      - install_rust
-      - setup_app
-      - run:
-          name: Run Formatter
-          command: mix format --check-formatted
-
-  ############
-  # frontend_unit_tests
-  ############
-  frontend_unit_tests:
-    <<: *defaults_backend
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run: cd frontend && npm run test -- -u
-
-  
-  ############
-  # end_to_end_tests
-  ############
-  frontend_end_to_end_tests:
-    <<: *defaults_backend
-    steps:
-      - run:
-            name: Setup Elixir App 
-            command: | 
-              mix local.rebar --force
-              mix local.hex --force
-              mix do deps.get, compile --warnings-as-errors --all-warnings
-      
-      - run:  npm run cypress:run
-
-  ############
-  # cypress_setup
-  ############
-  cypress_setup:
-    <<: *defaults_backend
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run:  npm run cypress:run
 
 workflows:
   version: 2
