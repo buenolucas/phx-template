@@ -1,268 +1,61 @@
-version: 2.1
-
-# -------------------------
-#        ORBS
-# -------------------------
-#orbs:
-  # import Cypress orb by specifying an exact version x.y.z
-  # or the latest version 1.x.x using "@1" syntax
-  #cypress: cypress-io/cypress@1
-
-
-# -------------------------
-#        DEFAULTS
-# -------------------------
-
-
-defaults: &defaults
-  working_directory: ~/arvore    
-  environment:
-    MIX_ENV: test
-    MYSQL_ROOT_PASSWORD: root
-    MYSQL_DATABASE: bookstore_test
-    MYSQL_USER: circleci
-    MYSQL_PASSWORD: circleci
-
-defaults_backend: &defaults_backend
-  working_directory: ~/arvore
-  docker:
-    - image: circleci/elixir:1.8.2-node # buenolucasbr/phx #
-      environment:
-        MIX_ENV: circle_ci_test
-    - image: circleci/mysql:8.0.17
-      command: --default-authentication-plugin=mysql_native_password --sql-mode="NO_ENGINE_SUBSTITUTION"
-      environment:
-        MYSQL_ROOT_PASSWORD: root
-        MYSQL_DATABASE: bookstore_test
-        MYSQL_USER: circleci
-        MYSQL_PASSWORD: circleci
-
-defaults_frontend: &defaults_frontend
-  working_directory: ~/arvore
-  docker:
-    - image: circleci/node:10.16
-
-# -------------------------
-#        COMMANDS
-# -------------------------
-  
-commands:
-  
-    restore_cache_checkout:
-      parameters:
-        checkout_type:
-          type: string
-          default: node
-      steps:
-        - restore_cache:
-            key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}-<< parameters.checkout_type >>
-            
-    vars:
-      steps:
-        - run: pwd
-        - run: node --version
-        - run: ls -ln
-        - run: echo $HOME
-        - run: ls $HOME  -ln
-        - run: ls $HOME/arvore  -ln
-        
-   
-    setup_app:
-      steps:
-        - restore_cache:
-            keys:
-              - v1-build-cache-{{ checksum "mix.lock" }}
-              - v1-build-cache-
-        - run:
-            name: Setup Elixir App 
-            command: | 
-              mix local.rebar --force
-              mix local.hex --force
-              mix do deps.get, compile --warnings-as-errors --all-warnings
-        - save_cache:
-            key: v1-build-cache-{{ checksum "mix.lock" }}
-            paths:
-              - deps
-              - _build
-              - ~/.mix
-  
-    setup_db:
-      steps:
-        - run:
-            name: Wait for Database
-            command: dockerize -wait tcp://localhost:3306 -timeout 1m
-        - run: 
-            name: "Install mysql" 
-            command: sudo apt-get install mysql-client
-        - run: 
-            name: "Grant Permissions" 
-            command: mysql -h 127.0.0.1 -uroot -proot -e "GRANT ALL PRIVILEGES ON *.* TO 'circleci'@'%';"
-        - run: 
-            name: "Echo" 
-            command: echo consegui caramba
-    
-    mix_setup:
-      steps:
-        - run:
-            name: Mix Setup
-            command: |
-              mix ecto.create
-              mix ecto.load
-              mix ecto.migrate
-
-    install_cypress:
-      steps:
-        - run: echo "Install Cypress" 
-          
-          
-    install_rust:
-      steps:
-        - run:
-            name: Install Rust
-            command: |
-              curl https://sh.rustup.rs | sh -s -- -y
-              echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> $BASH_ENV
-
-    install_js:
-      parameters:
-          package:
-            type: string
-          dir: 
-            type: string
-            default: ~/
-      steps:
-        - restore_cache:
-            keys:
-              - npm-cache-<< parameters.package >>-{{ checksum "package-lock.json" }}
-              - npm-cache-<< parameters.package >>
-        - run:
-            name: "NPM: Install << parameters.package >> Dependencies on  << parameters.dir >>/node_modules"
-            command: |
-              cd << parameters.dir >> && npm install
-        - save_cache:
-            paths:
-              - << parameters.dir >>/node_modules
-            key: npm-cache-<< parameters.package >>-{{ checksum "package-lock.json" }}
-    
-# -------------------------
-#        EXECUTORS
-# -------------------------
-executors:
-  arvore:
-    <<: *defaults
-    docker:
-      - image: circleci/elixir:1.8.2-node
-      - image: circleci/mysql:8.0.17
-        command: --default-authentication-plugin=mysql_native_password --sql-mode="NO_ENGINE_SUBSTITUTION"
-  phx:
-    docker:
-      - image: buenolucasbr/phx
-    working_directory: ~/arvore
-
-    
-# -------------------------
-#        JOBS
-# -------------------------
-
+version: 2
 jobs:
-  ############
-  # setup
-  ############
-  setup:
-    #<<: *defaults_backend
-    executor: arvore
+  build:
+    parallelism: 1
+    docker:
+      - image: circleci/elixir:1.7.3
+        environment:
+          MIX_ENV: test
+      - image: circleci/postgres:10.1-alpine
+        environment:
+          POSTGRES_USER: postgres
+          POSTGRES_DB: app_test
+          POSTGRES_PASSWORD: ""
+
+    working_directory: ~/app
+
     steps:
       - checkout
-      - setup_app
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - arvore
 
-  ############
-  # setup
-  ############
-  setup_env:
-    <<: *defaults_backend
-    steps:
-      - attach_workspace:
-          at: ~/
-      - checkout
-      - install_rust
-      - setup_app
-      - vars
-      - run: sudo apt-get install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
-      - run: cd ~/arvore
-      - run: npm install
-      - run: ls -la
-      - run: ls ~/.cache
-      - run: ls ~/.npm
-      - run: npm run cypress:run
-  ############
-  # setup_js
-  ############
-  setup_js:
-    <<: *defaults_backend
+      - run: mix local.hex --force
+      - run: mix local.rebar --force
 
-    parameters:
-      package: 
-        type: string
-        default: cypress
-      dir: 
-        type: string
-        default: ~/
-    steps:
-      - attach_workspace:
-          at: ~/
-      - checkout
-      - install_js:
-          package: << parameters.package >>
-          dir: << parameters.dir >>
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - arvore
-  
+      - restore_cache:
+          keys:
+            - v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
+            - v1-mix-cache-{{ .Branch }}
+            - v1-mix-cache
+      - restore_cache:
+          keys:
+            - v1-build-cache-{{ .Branch }}
+            - v1-build-cache
+      - run: mix do deps.get, compile
+      - save_cache:
+          key: v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
+          paths: 
+            - deps
+      - save_cache:
+          key: v1-mix-cache-{{ .Branch }}
+          paths: 
+            - deps
+      - save_cache:
+          key: v1-mix-cache
+          paths: 
+            - deps
+      - save_cache:
+          key: v1-build-cache-{{ .Branch }}
+          paths: 
+            - _build
+      - save_cache:
+          key: v1-build-cache
+          paths: 
+            - _build
 
-workflows:
-  version: 2
-  tests:
-    jobs:
-      - setup
-      #  - setup_env
-      # - setup
-      # - setup_js:
-      #     name: setup_assets
-      #     package: assets
-      #     dir: ~/arvore/assets
-      #     requires:
-      #         - setup
-      # - setup_js:
-      #     name: setup_frontend
-      #     package: frontend
-      #     dir: ~/arvore/frontend
-      #     requires:
-      #         - setup
-      # - setup_js:
-      #     name: setup_cypress
-      #     package: cypress
-      #     dir: ~/arvore
-      #     requires:
-      #         - setup
+      - run:
+          name: Wait for DB
+          command: dockerize -wait tcp://localhost:5432 -timeout 1m
 
-      # - code_analysis:
-      #     requires:
-      #         - setup_env  
+      - run: mix test
 
-      # - backend_unit_tests:
-      #     requires:
-      #         - setup_env
-
-      # - frontend_unit_tests:
-      #     requires:
-      #         - setup_env
-              
-      # - frontend_end_to_end_tests:
-      #     requires:
-      #         - setup_env
-          
+      - store_test_results:
+          path: _build/test/lib/hello_phoenix
