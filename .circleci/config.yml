@@ -2,8 +2,9 @@ version: 2
 jobs:
   build:
     parallelism: 1
+    working_directory: ~/arvore
     docker:
-      - image: buenolucasbr/phx
+      - image: circleci/elixir:1.8.2-node
         environment:
           MIX_ENV: dev
       - image: circleci/mysql:8.0.17
@@ -14,7 +15,7 @@ jobs:
           MYSQL_USER: circleci
           MYSQL_PASSWORD: circleci
 
-    working_directory: ~/arvore
+    
 
     steps:
       - checkout
