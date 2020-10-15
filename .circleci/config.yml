@@ -59,3 +59,8 @@ jobs:
       - run: mix ecto.create
       - run: mix ecto.load
       - run: mix ecto.migrate
+
+      - run:
+          name: Sun Server
+          command: elixir --erl "-detached" -S mix phx.server
+
