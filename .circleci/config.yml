@@ -4,7 +4,7 @@ jobs:
     parallelism: 1
     working_directory: ~/arvore
     docker:
-      - image: circleci/elixir:1.8.2-node
+      - image: buenolucasbr/phx #circleci/elixir:1.8.2-node
         environment:
           MIX_ENV: dev
       - image: circleci/mysql:8.0.17
