@@ -63,4 +63,16 @@ jobs:
       - run:
           name: Sun Server
           command: elixir --erl "-detached" -S mix phx.server
-
+      - run:
+          name: Sun Server
+          command: elixir --erl "-detached" -S mix phx.server
+      - run:
+          name: Waiting app...
+          command: |
+            for i in `seq 1 10`;
+            do
+              nc -z localhost 5000 && echo Success && exit 0
+              echo -n .
+              sleep 1
+            done
+            echo Failed waiting for App && exit 1

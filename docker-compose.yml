@@ -10,14 +10,14 @@ services:
     depends_on:
       - db
   db:
-    image: mysql
+    image: mysql:8.0.17
     container_name: db
     environment:
       MYSQL_ROOT_PASSWORD: rootp
-      MYSQL_DATABASE: app_db
-      MYSQL_USER: db_user
-      MYSQL_PASSWORD: db_user_pass
+      MYSQL_DATABASE: bookstore_test
+      MYSQL_USER: circleci
+      MYSQL_PASSWORD: circleci
     ports:
       - "3306:3306"
     volumes:
-      - ./stograge/db:/var/lib/mysql
+      - ./_storage/db:/var/lib/mysql

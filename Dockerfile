@@ -2,8 +2,8 @@ FROM elixir:1.8.2
 
 ENV NODE_VERSION 10.15.3
 RUN apt-get update && \
-    apt-get install -y mysql-client && \
-                             inotify-tools 
+    apt-get install -y  mysql-client \
+                        inotify-tools 
 
 RUN curl -L -o node.tar.xz "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz" && \
 	tar -xJf node.tar.xz -C /usr/local --strip-components=1 && \

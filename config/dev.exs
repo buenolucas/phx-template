@@ -2,10 +2,10 @@ use Mix.Config
 
 # Configure your database
 config :phx_template, PhxTemplate.Repo,
-  username: "circleci",
-  password: "circleci",
+  username: "root",
+  password: "rootp",
   database: "bookstore_test",
-  hostname: "localhost",
+  hostname: "db",
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
 
