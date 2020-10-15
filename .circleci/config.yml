@@ -17,7 +17,7 @@ version: 2.1
 defaults: &defaults
   working_directory: ~/arvore    
   environment:
-    MIX_ENV: circle_ci_test
+    MIX_ENV: test
     MYSQL_ROOT_PASSWORD: root
     MYSQL_DATABASE: bookstore_test
     MYSQL_USER: circleci
@@ -154,11 +154,12 @@ executors:
       - image: circleci/elixir:1.8.2-node
       - image: circleci/mysql:8.0.17
         command: --default-authentication-plugin=mysql_native_password --sql-mode="NO_ENGINE_SUBSTITUTION"
-  builder:
+  phx:
     docker:
-      - image: circleci/elixir:1.8.2-node
-      - image: circleci/mysql:8.0.17
-    working_directory: ~/project
+      - image: buenolucasbr/phx
+    working_directory: ~/arvore
+
+    
 # -------------------------
 #        JOBS
 # -------------------------
@@ -168,10 +169,9 @@ jobs:
   # setup
   ############
   setup:
-    <<: *defaults_backend
+    executor: phx
     steps:
       - checkout
-      - install_rust
       - setup_app
       - persist_to_workspace:
           root: ~/
@@ -305,8 +305,8 @@ workflows:
   version: 2
   tests:
     jobs:
-      # - cypress_setup
-        - setup_env
+      - setup
+      #  - setup_env
       # - setup
       # - setup_js:
       #     name: setup_assets
