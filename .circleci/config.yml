@@ -5,14 +5,16 @@ jobs:
     docker:
       - image: buenolucasbr/phx
         environment:
-          MIX_ENV: test
-      - image: circleci/postgres:10.1-alpine
+          MIX_ENV: dev
+      - image: circleci/mysql:8.0.17
+        command: --default-authentication-plugin=mysql_native_password --sql-mode="NO_ENGINE_SUBSTITUTION"
         environment:
-          POSTGRES_USER: postgres
-          POSTGRES_DB: app_test
-          POSTGRES_PASSWORD: ""
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: bookstore_test
+          MYSQL_USER: circleci
+          MYSQL_PASSWORD: circleci
 
-    working_directory: ~/app
+    working_directory: ~/arvore
 
     steps:
       - checkout
@@ -59,8 +61,10 @@ jobs:
 
       - run:
           name: Wait for DB
-          command: dockerize -wait tcp://localhost:5432 -timeout 1m
+          command: dockerize -wait tcp://localhost:3306 -timeout 1m
 
+      - run: mix echo.create
+      - run: mix echo.migrate
       - run: mix test
 
       - store_test_results:
