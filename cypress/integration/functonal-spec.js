@@ -7,9 +7,7 @@ describe('Should be run funcitonal tests', () => {
     })
 
     it('login', () => {
-      cy.login('FJD2390')
-      
-      
+     
     })
 })
  
