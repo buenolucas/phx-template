@@ -172,6 +172,7 @@ jobs:
     executor: phx
     steps:
       - checkout
+      - run: asdf install
       - setup_app
       - persist_to_workspace:
           root: ~/
