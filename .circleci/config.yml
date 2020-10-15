@@ -29,11 +29,8 @@ jobs:
           keys:
             - v1-build-cache-{{ .Branch }}
             - v1-build-cache
-      - run:
-            name: Install Rust
-            command: |
-              curl https://sh.rustup.rs | sh -s -- -y
-              echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> $BASH_ENV
+      - run: ls ~/home
+      - run: ls ~/home/arvore
 
       - run: mix do deps.get, compile --warnings-as-errors --all-warnings
       - save_cache:
