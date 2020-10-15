@@ -26,7 +26,7 @@ defaults: &defaults
 defaults_backend: &defaults_backend
   working_directory: ~/arvore
   docker:
-    - image: buenolucasbr/phx #circleci/elixir:1.8.2-node
+    - image: circleci/elixir:1.8.2-node # buenolucasbr/phx #
       environment:
         MIX_ENV: circle_ci_test
     - image: circleci/mysql:8.0.17
