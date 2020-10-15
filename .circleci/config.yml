@@ -4,7 +4,7 @@ jobs:
     parallelism: 1
     working_directory: ~/arvore
     docker:
-      - image: buenolucasbr/cimg-phx
+      - image: buenolucasbr/cimg-phx:latest
         environment:
           MIX_ENV: dev
       - image: circleci/mysql:8.0.17
