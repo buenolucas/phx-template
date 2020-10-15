@@ -59,6 +59,14 @@ jobs:
       - run: mix ecto.create
       - run: mix ecto.load
       - run: mix ecto.migrate
+
+      - run: sudo apt-get install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
+      - run: npm install
+      - run: ls -la
+      - run: ls ~/.cache
+      - run: ls ~/.npm
+      - run: npm run cypress:run
+
       - run:
           name: Sun Server
           command: elixir --erl "-detached" -S mix phx.server
@@ -75,3 +83,4 @@ jobs:
               sleep 1
             done
             echo Failed waiting for App && exit 1
+      
