@@ -3,7 +3,7 @@ jobs:
   build:
     parallelism: 1
     docker:
-      - image: circleci/elixir:1.7.3
+      - image: circleci/elixir:1.8.2-node
         environment:
           MIX_ENV: test
       - image: circleci/postgres:10.1-alpine
@@ -34,7 +34,7 @@ jobs:
             command: |
               curl https://sh.rustup.rs | sh -s -- -y
               echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> $BASH_ENV
-              
+
       - run: mix do deps.get, compile --warnings-as-errors --all-warnings
       - save_cache:
           key: v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
