@@ -169,7 +169,7 @@ jobs:
   # setup
   ############
   setup:
-    executor: arvore
+    <<: *defaults_backend
     steps:
       - checkout
       - setup_app
