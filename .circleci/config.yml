@@ -37,14 +37,7 @@ jobs:
   build:
     parallelism: 1
     working_directory: ~/arvore
-    docker:
-      - image: buenolucasbr/cimg-phx:latest
-        environment:
-          MIX_ENV: dev
-      - image: circleci/mysql:8.0.17
-        command: --default-authentication-plugin=mysql_native_password --sql-mode="NO_ENGINE_SUBSTITUTION"
-        
-
+    executor: arvore
     steps:
       - checkout
       - run: mix local.hex --force
