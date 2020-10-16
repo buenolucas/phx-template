@@ -194,8 +194,6 @@ jobs:
             sudo mysql -h 127.0.0.1 -uroot -proot -e "GRANT ALL PRIVILEGES ON *.* TO 'circleci'@'%';"
             sudo mysql -h 127.0.0.1 -uroot -proot -e "CREATE DATABASE IF NOT EXISTS bookstore_test;"
             mysql -h 127.0.0.1 -u circleci -pcircleci bookstore_test < priv/repo/structure.sql            
-            mix ecto.migrate
-            echo "DENTRO"
       - save_cache:
           key: v1-tests-{{ .Branch }}-{{ checksum "mix.lock" }}
           paths:
@@ -243,3 +241,5 @@ workflows:
       - unit_tests_backend:
           requires:
             - build_backend
+
+

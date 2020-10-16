@@ -85,8 +85,21 @@ jobs:
       - run: mix local.hex --force
       - run: mix local.rebar --force
 
+       #
+       # app install
+       #
+      - run: 
+          name: "### appp install "
+          command: echo ""
       - install_app
       
+
+      #
+      # db install
+      #
+      - run: 
+          name: "### db install "
+          command: echo ""
       - run:
           name: Wait for DB
           command: dockerize -wait tcp://localhost:3306 -timeout 1m
@@ -96,8 +109,11 @@ jobs:
       - run: mix ecto.migrate
       
       #
-      # assets
+      # assets install
       #
+      - run: 
+          name: "### assets install "
+          command: echo ""
       - restore_cache:
           keys:
             - v1-assets-cache-{{ .Branch }}-{{ checksum "assets/package-lock.json" }}
@@ -110,8 +126,11 @@ jobs:
             - node_modules
 
       #
-      # frontend
+      # frontend install
       #
+      - run: 
+          name: "### frontend install "
+          command: echo ""
       - restore_cache:
           keys:
             - v1-frontend-cache-{{ .Branch }}-{{ checksum "frontend/package-lock.json" }}
@@ -124,25 +143,63 @@ jobs:
             - frontend/node_modules
 
       #
-      # cypress
+      # cypress install
       #
+      - run: 
+          name: "### cypress install "
+          command: echo ""
       - restore_cache:
           keys:
             - v1-cypress-cache-{{ .Branch }}-{{ checksum "package-lock.json" }}
             - v1-cypress-cache-{{ .Branch }}
             - v1-cypress-cache
       - run: npm install
-      - run: ls  ~/.cache/Cypress
-      - run: pwd
       - save_cache:
           key: v1-cypress-cache-{{ .Branch }}-{{ checksum "package-lock.json" }}
           paths: 
             - node_modules
             - /home/circleci/.cache/Cypress
-    
+      
+      #
+      # code_analysis
+      #
+      - run: 
+          name: "### code_analysis"
+          command: echo ""
+      - run:
+          name: Run Formatter
+          command: mix format --check-formatted
+      
+      #
+      # unit_tests_backend
+      #
+      - run: 
+          name: "### unit_tests_backend"
+          command: echo ""
+      - run:
+          name: Run backend unit tests
+          command: mix format --check-formatted
+
+      #
+      # frontend_unit_tests
+      #
+      - run: 
+          name: "### frontend_unit_tests"
+          command: echo "Run frontend unit tests"
+      - run:
+          name: Run frontend unit tests
+          command: cd frontend && npm run test
+
+      #
+      # frontend_end_to_end_tests
+      #
+      - run: 
+          name: "### frontend_end_to_end_tests"
+          command: echo ""
       - run:
           name: Sun Server
           command: elixir --erl "-detached" -S mix phx.server
+      - run: sudo apt-get install -y  net-tools
       - run:
           name: Waiting app...
           command: |
@@ -153,26 +210,9 @@ jobs:
               sleep 1
             done
             echo Failed waiting for App && exit 1
-      - run: npm run cypress:run
-
-
-  code_analysis_backend:
-    executor: arvore
-    steps:
-      - attach_workspace:
-            at: ~/
-      - restore_cache:
-            keys:
-              - v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
-              - v1-mix-cache-{{ .Branch }}
-              - v1-mix-cache
-      - restore_cache:
-          keys:
-            - v1-build-cache-{{ .Branch }}
-            - v1-build-cache
-      - run:
-          name: Run Formatter
-          command: mix format --check-formatted
+      - run: 
+          name: Run end to end tests
+          command: npm run cypress:run
 
 workflows:
   version: 2
