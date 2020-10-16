@@ -7,7 +7,7 @@ version: 2.1
 defaults: &defaults
   working_directory: ~/arvore    
   environment:
-    MIX_ENV: test
+    MIX_ENV: dev
     MYSQL_ROOT_PASSWORD: rootw
     MYSQL_DATABASE: bookstore_test
     MYSQL_USER: circleci
