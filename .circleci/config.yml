@@ -1,4 +1,38 @@
-version: 2
+version: 2.1
+
+# -------------------------
+#        DEFAULTS
+# -------------------------
+
+defaults: &defaults
+  working_directory: ~/arvore    
+  environment:
+    MIX_ENV: dev
+    MYSQL_ROOT_PASSWORD: rootw
+    MYSQL_DATABASE: bookstore_test
+    MYSQL_USER: circleci
+    MYSQL_PASSWORD: circleci
+
+# -------------------------
+#        EXECUTORS
+# -------------------------
+executors:
+  arvore:
+    <<: *defaults
+    docker:
+      - image: buenolucasbr/cimg-phx
+      - image: circleci/mysql:8.0.17
+        command: --default-authentication-plugin=mysql_native_password --sql-mode="NO_ENGINE_SUBSTITUTION"
+        environment:
+          MYSQL_ROOT_PASSWORD: rootw
+          MYSQL_DATABASE: bookstore_test
+          MYSQL_USER: circleci
+          MYSQL_PASSWORD: circleci
+
+
+# -------------------------
+#        JOBS
+# -------------------------
 jobs:
   build:
     parallelism: 1
@@ -9,11 +43,7 @@ jobs:
           MIX_ENV: dev
       - image: circleci/mysql:8.0.17
         command: --default-authentication-plugin=mysql_native_password --sql-mode="NO_ENGINE_SUBSTITUTION"
-        environment:
-          MYSQL_ROOT_PASSWORD: rootw
-          MYSQL_DATABASE: bookstore_test
-          MYSQL_USER: circleci
-          MYSQL_PASSWORD: circleci
+        
 
     steps:
       - checkout
@@ -122,3 +152,17 @@ jobs:
             echo Failed waiting for App && exit 1
       - run: npm run cypress:run
       
+workflows:
+  version: 2
+  tests:
+    jobs:
+      - build
+  # continuous_integration:
+  #   jobs:
+  #     - build_backend
+  #     # - code_analysis_backend:
+  #     #     requires:
+  #     #       - build_backend
+  #     - unit_tests_backend:
+  #         requires:
+  #           - build_backend
