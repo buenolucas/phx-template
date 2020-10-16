@@ -219,9 +219,9 @@ workflows:
   tests:
     jobs:
       - build
-      - code_analysis_backend:
-          requires:
-          - build
+      # - code_analysis_backend:
+      #     requires:
+      #     - build
   # continuous_integration:
   #   jobs:
   #     - build_backend
