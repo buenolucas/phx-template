@@ -94,7 +94,7 @@ jobs:
             - v1-assets-cache
       - run: cd assets && npm install
       - save_cache:
-          key: v1-cypress-cache-{{ .Branch }}-{{ checksum "package-lock.json" }}
+          key: v1-assets-cache-{{ .Branch }}-{{ checksum "package-lock.json" }}
           paths: 
             - node_modules
 
@@ -120,19 +120,16 @@ jobs:
             - v1-cypress-cache-{{ .Branch }}-{{ checksum "package-lock.json" }}
             - v1-cypress-cache-{{ .Branch }}
             - v1-cypress-cache
-
-      - run: sudo apt-get install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
       - run: npm install
       - save_cache:
           key: v1-cypress-cache-{{ .Branch }}-{{ checksum "package-lock.json" }}
           paths: 
             - node_modules
-            - .cache/Cypress
+            - ~/.cache/Cypress
     
       - run:
           name: Sun Server
           command: elixir --erl "-detached" -S mix phx.server
-      - run: sudo apt-get install -y  net-tools
       - run:
           name: Waiting app...
           command: |
