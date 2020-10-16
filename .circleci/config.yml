@@ -138,7 +138,7 @@ jobs:
           key: v1-cypress-cache-{{ .Branch }}-{{ checksum "package-lock.json" }}
           paths: 
             - node_modules
-            - $HOME/.cache/Cypress
+            - /home/circleci/.cache/Cypress
     
       - run:
           name: Sun Server
