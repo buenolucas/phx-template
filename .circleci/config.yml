@@ -152,7 +152,25 @@ jobs:
             done
             echo Failed waiting for App && exit 1
       - run: npm run cypress:run
-      
+
+
+  code_analysis_backend:
+    working_directory: ~/arvore
+    executor: arvore
+    steps:
+      - restore_cache:
+            keys:
+              - v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
+              - v1-mix-cache-{{ .Branch }}
+              - v1-mix-cache
+      - restore_cache:
+          keys:
+            - v1-build-cache-{{ .Branch }}
+            - v1-build-cache
+      - run:
+          name: Run Formatter
+          command: mix format --check-formatted
+
 workflows:
   version: 2
   tests:
