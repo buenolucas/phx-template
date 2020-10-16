@@ -159,6 +159,8 @@ jobs:
   code_analysis_backend:
     executor: arvore
     steps:
+      - attach_workspace:
+            at: ~/
       - restore_cache:
             keys:
               - v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
