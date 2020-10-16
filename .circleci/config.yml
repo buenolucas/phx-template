@@ -16,7 +16,6 @@ defaults: &defaults
 # -------------------------
 #        EXECUTORS
 # -------------------------
-
 executors:
   arvore:
     <<: *defaults
@@ -24,11 +23,11 @@ executors:
       - image: buenolucasbr/cimg-phx
       - image: circleci/mysql:8.0.17
         command: --default-authentication-plugin=mysql_native_password --sql-mode="NO_ENGINE_SUBSTITUTION"
-
-
-# -------------------------
-#        COMMANDS
-# -------------------------
+        environment:
+          MYSQL_ROOT_PASSWORD: rootw
+          MYSQL_DATABASE: bookstore_test
+          MYSQL_USER: circleci
+          MYSQL_PASSWORD: circleci
 
 
 # -------------------------
