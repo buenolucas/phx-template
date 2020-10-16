@@ -157,7 +157,6 @@ jobs:
 
 
   code_analysis_backend:
-    working_directory: ~/arvore
     executor: arvore
     steps:
       - restore_cache:
