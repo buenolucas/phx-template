@@ -132,6 +132,7 @@ jobs:
             - v1-cypress-cache-{{ .Branch }}
             - v1-cypress-cache
       - run: npm install
+      - ls:  ~/.cache/Cypress
       - save_cache:
           key: v1-cypress-cache-{{ .Branch }}-{{ checksum "package-lock.json" }}
           paths: 
