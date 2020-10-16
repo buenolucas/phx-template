@@ -24,7 +24,7 @@ executors:
       - image: circleci/mysql:8.0.17
         command: --default-authentication-plugin=mysql_native_password --sql-mode="NO_ENGINE_SUBSTITUTION"
         environment:
-          MYSQL_ROOT_PASSWORD: rootw
+          MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: bookstore_test
           MYSQL_USER: circleci
           MYSQL_PASSWORD: circleci
