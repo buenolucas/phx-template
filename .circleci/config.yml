@@ -133,11 +133,12 @@ jobs:
             - v1-cypress-cache
       - run: npm install
       - run: ls  ~/.cache/Cypress
+      - run: pwd
       - save_cache:
           key: v1-cypress-cache-{{ .Branch }}-{{ checksum "package-lock.json" }}
           paths: 
             - node_modules
-            - ~/.cache/Cypress
+            - $HOME/.cache/Cypress
     
       - run:
           name: Sun Server
