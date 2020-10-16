@@ -16,6 +16,7 @@ defaults: &defaults
 # -------------------------
 #        EXECUTORS
 # -------------------------
+
 executors:
   arvore:
     <<: *defaults
@@ -23,6 +24,12 @@ executors:
       - image: buenolucasbr/cimg-phx
       - image: circleci/mysql:8.0.17
         command: --default-authentication-plugin=mysql_native_password --sql-mode="NO_ENGINE_SUBSTITUTION"
+
+
+# -------------------------
+#        COMMANDS
+# -------------------------
+
 
 # -------------------------
 #        JOBS
