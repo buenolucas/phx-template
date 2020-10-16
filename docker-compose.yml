@@ -13,11 +13,11 @@ services:
     image: mysql:8.0.17
     container_name: db
     environment:
-      MYSQL_ROOT_PASSWORD: rootp
-      MYSQL_DATABASE: bookstore_test
-      MYSQL_USER: circleci
-      MYSQL_PASSWORD: circleci
+      MYSQL_ROOT_PASSWORD: rootw
     ports:
       - "3306:3306"
     volumes:
-      - ./_storage/db:/var/lib/mysql
+        - ~/_storage/db:/var/lib/mysql
+          
+  
+  

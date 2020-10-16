@@ -6,7 +6,7 @@ config :phx_template, PhxTemplate.Repo,
   password: "rootw",
   database: "bookstore_test",
   hostname: "localhost",
-  show_sensitive_data_on_connection_error: true,
+  #show_sensitive_data_on_connection_error: true,
   pool_size: 10
 
 # For development, we disable any cache and enable

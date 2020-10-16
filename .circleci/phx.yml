@@ -1,26 +1,12 @@
-version: 2.1
-
-# -------------------------
-#        DEFAULTS
-# -------------------------
-
-defaults: &defaults
-  working_directory: ~/arvore    
-  environment:
-    MIX_ENV: dev
-    MYSQL_ROOT_PASSWORD: rootw
-    MYSQL_DATABASE: bookstore_test
-    MYSQL_USER: circleci
-    MYSQL_PASSWORD: circleci
-
-# -------------------------
-#        EXECUTORS
-# -------------------------
-executors:
-  arvore:
-    <<: *defaults
+version: 2
+jobs:
+  build:
+    parallelism: 1
+    working_directory: ~/arvore
     docker:
-      - image: buenolucasbr/cimg-phx
+      - image: buenolucasbr/cimg-phx:latest
+        environment:
+          MIX_ENV: dev
       - image: circleci/mysql:8.0.17
         command: --default-authentication-plugin=mysql_native_password --sql-mode="NO_ENGINE_SUBSTITUTION"
         environment:
@@ -29,15 +15,11 @@ executors:
           MYSQL_USER: circleci
           MYSQL_PASSWORD: circleci
 
+    steps:
+      - checkout
+      - run: mix local.hex --force
+      - run: mix local.rebar --force
 
-# -------------------------
-#        COMMANDS
-# -------------------------
-
-commands: 
-  install_app:
-    steps: 
-      - run: echo "Install App"
       - restore_cache:
           keys:
             - v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
@@ -47,6 +29,8 @@ commands:
           keys:
             - v1-build-cache-{{ .Branch }}
             - v1-build-cache
+      
+
       - run: mix do deps.get, compile --warnings-as-errors --all-warnings
       - save_cache:
           key: v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
@@ -68,25 +52,7 @@ commands:
           key: v1-build-cache
           paths: 
             - _build
-  install_js:
-    steps: 
-      - run: echo "Install JS"
-  
-# -------------------------
-#        JOBS
-# -------------------------
-jobs:
-  build:
-    parallelism: 1
-    working_directory: ~/arvore
-    executor: arvore
-    steps:
-      - checkout
-      - run: mix local.hex --force
-      - run: mix local.rebar --force
 
-      - install_app
-      
       - run:
           name: Wait for DB
           command: dockerize -wait tcp://localhost:3306 -timeout 1m
@@ -131,16 +97,19 @@ jobs:
             - v1-cypress-cache-{{ .Branch }}-{{ checksum "package-lock.json" }}
             - v1-cypress-cache-{{ .Branch }}
             - v1-cypress-cache
+
+      - run: sudo apt-get install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
       - run: npm install
       - save_cache:
           key: v1-cypress-cache-{{ .Branch }}-{{ checksum "package-lock.json" }}
           paths: 
             - node_modules
-            - ~/.cache/Cypress
+            - .cache/Cypress
     
       - run:
           name: Sun Server
           command: elixir --erl "-detached" -S mix phx.server
+      - run: sudo apt-get install -y  net-tools
       - run:
           name: Waiting app...
           command: |
@@ -153,17 +122,3 @@ jobs:
             echo Failed waiting for App && exit 1
       - run: npm run cypress:run
       
-workflows:
-  version: 2
-  tests:
-    jobs:
-      - build
-  # continuous_integration:
-  #   jobs:
-  #     - build_backend
-  #     # - code_analysis_backend:
-  #     #     requires:
-  #     #       - build_backend
-  #     - unit_tests_backend:
-  #         requires:
-  #           - build_backend

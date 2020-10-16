@@ -19,3 +19,12 @@ Ready to run in production? Please [check our deployment guides](https://hexdocs
   * Forum: https://elixirforum.com/c/phoenix-forum
   * Source: https://github.com/phoenixframework/phoenix
 # phx-template
+
+
+docker run \
+--detach \
+--name=phxdb \
+--env="MYSQL_ROOT_PASSWORD=rootw" \
+--publish 3306:3306 \
+--volume=/_storage/db:/var/lib/mysql \
+mysql
