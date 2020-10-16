@@ -31,18 +31,13 @@ executors:
 
 
 # -------------------------
-#        JOBS
+#        COMMANDS
 # -------------------------
-jobs:
-  build:
-    parallelism: 1
-    working_directory: ~/arvore
-    executor: arvore
-    steps:
-      - checkout
-      - run: mix local.hex --force
-      - run: mix local.rebar --force
 
+commands: 
+  install_app:
+    steps: 
+      - run: echo "Install App"
       - restore_cache:
           keys:
             - v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
@@ -52,8 +47,6 @@ jobs:
           keys:
             - v1-build-cache-{{ .Branch }}
             - v1-build-cache
-      
-
       - run: mix do deps.get, compile --warnings-as-errors --all-warnings
       - save_cache:
           key: v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
@@ -75,7 +68,25 @@ jobs:
           key: v1-build-cache
           paths: 
             - _build
+  install_js:
+    steps: 
+      - run: echo "Install JS"
+  
+# -------------------------
+#        JOBS
+# -------------------------
+jobs:
+  build:
+    parallelism: 1
+    working_directory: ~/arvore
+    executor: arvore
+    steps:
+      - checkout
+      - run: mix local.hex --force
+      - run: mix local.rebar --force
 
+      - install_app
+      
       - run:
           name: Wait for DB
           command: dockerize -wait tcp://localhost:3306 -timeout 1m
