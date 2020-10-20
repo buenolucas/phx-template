@@ -94,6 +94,7 @@ jobs:
   server_build:
     executor: arvore
     steps:
+    - chckout
     - attach_workspace:
         at: ~/
     - run: mix local.hex --force
@@ -171,8 +172,7 @@ jobs:
 workflows:
   build:
     jobs:
-      - cypress/install:
-          executor: arvore
+      
       - server_build:
          requires:
             - cypress/install     
