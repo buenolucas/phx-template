@@ -36,12 +36,131 @@ executors:
         - image: cimg/elixir:1.10.4-node
         - image: circleci/mysql:8.0.17
           command: --default-authentication-plugin=mysql_native_password --sql-mode="NO_ENGINE_SUBSTITUTION"
-      
 
 
 # -------------------
 #
-#        ORBS
+#     COMMANDS
+#
+# -------------------
+
+commands: 
+  # -------------------------
+  #  instlal app
+  # -------------------------
+  install_app:
+    steps: 
+      - run: echo "Install App"
+      - restore_cache:
+          keys:
+            - v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
+            - v1-mix-cache-{{ .Branch }}
+            - v1-mix-cache
+      - restore_cache:
+          keys:
+            - v1-build-cache-{{ .Branch }}
+            - v1-build-cache
+      - run: mix do deps.get, compile --warnings-as-errors --all-warnings
+      - save_cache:
+          key: v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
+          paths: 
+            - deps
+      - save_cache:
+          key: v1-mix-cache-{{ .Branch }}
+          paths: 
+            - deps
+      - save_cache:
+          key: v1-mix-cache
+          paths: 
+            - deps
+      - save_cache:
+          key: v1-build-cache-{{ .Branch }}
+          paths: 
+            - _build
+      - save_cache:
+          key: v1-build-cache
+          paths: 
+            - _build
+      
+# -------------------
+#
+#      JOBS
+#
+# -------------------
+jobs: 
+  # -------------------
+  #  server_build
+  # -------------------
+  server_build:
+    executor: arvore
+    steps:
+    - attach_workspace:
+        at: ~/
+    - run: mix local.hex --force
+    - run: mix local.rebar --force
+
+    #
+    # app install
+    #
+    - run: 
+        name: "### appp install "
+        command: echo ""
+    - install_app
+    
+
+    #
+    # db install
+    #
+    - run: 
+        name: "### db install "
+        command: echo ""
+    - run:
+        name: Wait for DB
+        command: dockerize -wait tcp://localhost:3306 -timeout 1m
+
+    - run: mix ecto.create
+    - run: mix ecto.load
+    - run: mix ecto.migrate
+    
+    #
+    # assets install
+    #
+    - run: 
+        name: "### assets install "
+        command: echo ""
+    - restore_cache:
+        keys:
+          - v1-assets-cache-{{ .Branch }}-{{ checksum "assets/package-lock.json" }}
+          - v1-assets-cache-{{ .Branch }}
+          - v1-assets-cache
+    - run: cd assets && npm install
+    - save_cache:
+        key: v1-assets-cache-{{ .Branch }}-{{ checksum "package-lock.json" }}
+        paths: 
+          - node_modules
+
+    #
+    # frontend install
+    #
+    - run: 
+        name: "### frontend install "
+        command: echo ""
+    - restore_cache:
+        keys:
+          - v1-frontend-cache-{{ .Branch }}-{{ checksum "frontend/package-lock.json" }}
+          - v1-frontend-cache-{{ .Branch }}
+          - v1-frontend-cache
+    - run: cd frontend && npm install
+    - save_cache:
+        key: v1-frontend-cache-{{ .Branch }}-{{ checksum "frontend/package-lock.json" }}
+        paths: 
+          - frontend/node_modules
+    
+    
+      
+# -------------------
+#
+#      WORKFLOWS
 #
 # -------------------
 
@@ -49,11 +168,7 @@ workflows:
   build:
     jobs:
       - cypress/install
-      - server-build:
-          executor: arvore
-          steps:
-              - attach_workspace:
-                at: ~/
+      - server_build          
       - cypress/run:
           store_artifacts: true
           start: elixir --erl "-detached" -S mix phx.server
@@ -61,4 +176,4 @@ workflows:
           attach-workspace: true
           requires:
             - cypress/install
-            - server-build
+            - server_build
