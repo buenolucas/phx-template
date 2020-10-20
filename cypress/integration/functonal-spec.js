@@ -1,13 +1,10 @@
 /// <reference types="Cypress" />
 
-import l from '../support/locators'
-describe('Should be run funcitonal tests', () => {
-    before(() => {
-        
-    })
+import l from "../support/locators";
+describe("Should be fuck", () => {
+  before(() => {});
 
-    it('login', () => {
-     
-    })
-})
- 
+  it("should gonna be yeah!", () => {
+    expect(true).to.equal(true);
+  });
+});

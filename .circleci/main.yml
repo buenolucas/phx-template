@@ -1,0 +1,233 @@
+version: 2.1
+
+# -------------------------
+#        DEFAULTS
+# -------------------------
+
+defaults: &defaults
+  working_directory: ~/arvore    
+  environment:
+    MIX_ENV: dev
+    MYSQL_ROOT_PASSWORD: rootw
+    MYSQL_DATABASE: bookstore_test
+    MYSQL_USER: circleci
+    MYSQL_PASSWORD: circleci
+
+# -------------------------
+#        EXECUTORS
+# -------------------------
+executors:
+  arvore:
+    <<: *defaults
+    docker:
+      - image: buenolucasbr/cimg-phx
+      - image: circleci/mysql:8.0.17
+        command: --default-authentication-plugin=mysql_native_password --sql-mode="NO_ENGINE_SUBSTITUTION"
+        environment:
+          MYSQL_ROOT_PASSWORD: rootw
+          MYSQL_DATABASE: bookstore_test
+          MYSQL_USER: circleci
+          MYSQL_PASSWORD: circleci
+
+
+# -------------------------
+#        COMMANDS
+# -------------------------
+
+commands: 
+  install_app:
+    steps: 
+      - run: echo "Install App"
+      - restore_cache:
+          keys:
+            - v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
+            - v1-mix-cache-{{ .Branch }}
+            - v1-mix-cache
+      - restore_cache:
+          keys:
+            - v1-build-cache-{{ .Branch }}
+            - v1-build-cache
+      - run: mix do deps.get, compile --warnings-as-errors --all-warnings
+      - save_cache:
+          key: v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
+          paths: 
+            - deps
+      - save_cache:
+          key: v1-mix-cache-{{ .Branch }}
+          paths: 
+            - deps
+      - save_cache:
+          key: v1-mix-cache
+          paths: 
+            - deps
+      - save_cache:
+          key: v1-build-cache-{{ .Branch }}
+          paths: 
+            - _build
+      - save_cache:
+          key: v1-build-cache
+          paths: 
+            - _build
+  install_js:
+    steps: 
+      - run: echo "Install JS"
+  
+# -------------------------
+#        JOBS
+# -------------------------
+jobs:
+  build:
+    parallelism: 1
+    working_directory: ~/arvore
+    executor: arvore
+    steps:
+      - checkout
+      - run: mix local.hex --force
+      - run: mix local.rebar --force
+
+       #
+       # app install
+       #
+      - run: 
+          name: "### appp install "
+          command: echo ""
+      - install_app
+      
+
+      #
+      # db install
+      #
+      - run: 
+          name: "### db install "
+          command: echo ""
+      - run:
+          name: Wait for DB
+          command: dockerize -wait tcp://localhost:3306 -timeout 1m
+
+      - run: mix ecto.create
+      - run: mix ecto.load
+      - run: mix ecto.migrate
+      
+      #
+      # assets install
+      #
+      - run: 
+          name: "### assets install "
+          command: echo ""
+      - restore_cache:
+          keys:
+            - v1-assets-cache-{{ .Branch }}-{{ checksum "assets/package-lock.json" }}
+            - v1-assets-cache-{{ .Branch }}
+            - v1-assets-cache
+      - run: cd assets && npm install
+      - save_cache:
+          key: v1-assets-cache-{{ .Branch }}-{{ checksum "package-lock.json" }}
+          paths: 
+            - node_modules
+
+      #
+      # frontend install
+      #
+      - run: 
+          name: "### frontend install "
+          command: echo ""
+      - restore_cache:
+          keys:
+            - v1-frontend-cache-{{ .Branch }}-{{ checksum "frontend/package-lock.json" }}
+            - v1-frontend-cache-{{ .Branch }}
+            - v1-frontend-cache
+      - run: cd frontend && npm install
+      - save_cache:
+          key: v1-frontend-cache-{{ .Branch }}-{{ checksum "frontend/package-lock.json" }}
+          paths: 
+            - frontend/node_modules
+
+      #
+      # cypress install
+      #
+      - run: 
+          name: "### cypress install "
+          command: echo ""
+      - restore_cache:
+          keys:
+            - v1-cypress-cache-{{ .Branch }}-{{ checksum "package-lock.json" }}
+            - v1-cypress-cache-{{ .Branch }}
+            - v1-cypress-cache
+      - run: npm install
+      - save_cache:
+          key: v1-cypress-cache-{{ .Branch }}-{{ checksum "package-loOck.json" }}
+          paths: 
+            - node_modules
+            - /home/circleci/.cache/Cypress
+      
+      #
+      # code_analysis
+      #
+      - run: 
+          name: "### code_analysis"
+          command: echo ""
+      - run:
+          name: Run Formatter
+          command: mix format --check-formatted
+      
+      #
+      # unit_tests_backend
+      #
+      - run: 
+          name: "### unit_tests_backend"
+          command: echo ""
+      - run:
+          name: Run backend unit tests
+          command: mix format --check-formatted
+
+      #
+      # frontend_unit_tests
+      #
+      - run: 
+          name: "### frontend_unit_tests"
+          command: echo "Run frontend unit tests"
+      - run:
+          name: Run frontend unit tests
+          command: cd frontend && npm run test
+
+      #
+      # frontend_end_to_end_tests
+      #
+      - run: 
+          name: "### frontend_end_to_end_tests"
+          command: echo ""
+      - run:
+          name: Sun Server
+          command: elixir --erl "-detached" -S mix phx.server
+      - run: sudo apt-get install -y  net-tools
+      - run:
+          name: Waiting app...
+          command: |
+            for i in `seq 1 100`;
+            do
+              nc -z localhost 5000 && echo Success && exit 0
+              echo -n .
+              sleep 1
+            done
+            echo Failed waiting for App && exit 1
+      - run: 
+          name: Run end to end tests
+          command: npm run cypress:run
+
+workflows:
+  version: 2
+  tests:
+    jobs:
+      - build
+      # - code_analysis_backend:
+      #     requires:
+      #     - build
+  # continuous_integration:
+  #   jobs:
+  #     - build_backend
+  #     # - code_analysis_backend:
+  #     #     requires:
+  #     #       - build_backend
+  #     - unit_tests_backend:
+  #         requires:
+  #           - build_backend
