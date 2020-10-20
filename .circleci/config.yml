@@ -94,11 +94,20 @@ commands:
 #
 # -------------------
 jobs: 
+  check:
+    <<: *defaults
+    executor: arvore
+    steps:
+    - run: ls
+    - run: pwd
+    - run: cd ~/
+    - run: pwd
 
   # -------------------
   #  server_build
   # -------------------
   server_build:
+    <<: *defaults
     executor: arvore
     steps:
     - checkout
@@ -189,8 +198,14 @@ jobs:
 workflows:
   build:
     jobs:
-      #- server_build
+      
+      - server_build
+      - check:
+          requires:
+            - server_build
       - cypress/run:
+          requires:
+            - server_build
           executor:
             arvore
           attach-workspace: true
