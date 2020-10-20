@@ -94,7 +94,7 @@ jobs:
   server_build:
     executor: arvore
     steps:
-    - chckout
+    - checkout
     - attach_workspace:
         at: ~/
     - run: mix local.hex --force
