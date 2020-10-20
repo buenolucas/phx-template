@@ -172,10 +172,7 @@ jobs:
 workflows:
   build:
     jobs:
-      
-      - server_build:
-         requires:
-            - cypress/install     
+      - server_build
       - cypress/run:
           requires:
             - server_build
