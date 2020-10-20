@@ -98,7 +98,6 @@ jobs:
         at: ~/
     - run: mix local.hex --force
     - run: mix local.rebar --force
-
     #
     # app install
     #
@@ -170,10 +169,10 @@ workflows:
       - cypress/install
       - server_build          
       - cypress/run:
-          store_artifacts: true
-          start: elixir --erl "-detached" -S mix phx.server
-          wait-on: 'http://localhost:5000'
-          attach-workspace: true
           requires:
             - cypress/install
             - server_build
+          attach-workspace: true
+          start: elixir --erl "-detached" -S mix phx.server
+          wait-on: 'http://localhost:5000'
+          
