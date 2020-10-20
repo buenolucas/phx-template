@@ -208,6 +208,8 @@ workflows:
             - server_build
           executor:
             arvore
+          
+          start: cd ~/arvore && mix setup
           attach-workspace: true
           store_artifacts: true
           #start: cd ~/arvore && mix setup
