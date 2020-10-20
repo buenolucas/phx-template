@@ -1,13 +1,64 @@
-# to use orbs, must use version >= 2.1
 version: 2.1
+
+
+# -------------------
+#
+#       DEFAULTS
+#
+# -------------------
+
+defaults: &defaults
+  working_directory: ~/    
+  environment:
+    MIX_ENV: dev
+    MYSQL_ROOT_PASSWORD: rootw
+    MYSQL_DATABASE: bookstore_test
+    MYSQL_USER: circleci
+    MYSQL_PASSWORD: circleci
+
+# -------------------
+#
+#        ORBS
+#
+# -------------------
 orbs:
-  # import Cypress orb by specifying an exact version x.y.z
-  # or the latest version 1.x.x using "@1" syntax
-  cypress: cypress-io/cypress@1
+  cypress: cypress-io/cypress@1.1.0
+
+# -------------------
+#
+#      EXECUTORS
+#
+# -------------------
+executors:
+    arvore:
+      <<: *defaults
+      docker:
+        - image: cimg/elixir:1.10.4-node
+        - image: circleci/mysql:8.0.17
+          command: --default-authentication-plugin=mysql_native_password --sql-mode="NO_ENGINE_SUBSTITUTION"
+      
+
+
+# -------------------
+#
+#        ORBS
+#
+# -------------------
+
 workflows:
   build:
     jobs:
-      # "cypress" is the name of the imported orb
-      # "run" is the name of the job defined in Cypress orb
+      - cypress/install
+      - server-build:
+          executor: arvore
+          steps:
+              - attach_workspace:
+                at: ~/
       - cypress/run:
           store_artifacts: true
+          start: elixir --erl "-detached" -S mix phx.server
+          wait-on: 'http://localhost:5000'
+          attach-workspace: true
+          requires:
+            - cypress/install
+            - server-build
