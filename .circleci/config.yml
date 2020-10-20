@@ -123,7 +123,7 @@ jobs:
         name: Wait for DB
         command: dockerize -wait tcp://localhost:3306 -timeout 1m
 
-    - run: mix ecto.create
+    #- run: mix ecto.create
     # - run: mix ecto.load
     #- run: mix ecto.migrate
     
@@ -147,19 +147,19 @@ jobs:
     #
     # frontend install
     #
-    - run: 
-        name: "### frontend install "
-        command: echo ""
-    - restore_cache:
-        keys:
-          - v1-frontend-cache-{{ .Branch }}-{{ checksum "frontend/package-lock.json" }}
-          - v1-frontend-cache-{{ .Branch }}
-          - v1-frontend-cache
-    - run: cd frontend && npm install
-    - save_cache:
-        key: v1-frontend-cache-{{ .Branch }}-{{ checksum "frontend/package-lock.json" }}
-        paths: 
-          - frontend/node_modules
+    # - run: 
+    #     name: "### frontend install "
+    #     command: echo ""
+    # - restore_cache:
+    #     keys:
+    #       - v1-frontend-cache-{{ .Branch }}-{{ checksum "frontend/package-lock.json" }}
+    #       - v1-frontend-cache-{{ .Branch }}
+    #       - v1-frontend-cache
+    # - run: cd frontend && npm install
+    # - save_cache:
+    #     key: v1-frontend-cache-{{ .Branch }}-{{ checksum "frontend/package-lock.json" }}
+    #     paths: 
+    #       - frontend/node_modules
     
     #
     #  Run Server
@@ -189,12 +189,12 @@ jobs:
 workflows:
   build:
     jobs:
-      #- server_build
+      - server_build
       - cypress/run:
           executor:
             arvore
-          # requires:
-          #   - server_build
+          requires:
+            - server_build
           #start: mix local.hex --force && mix local.rebar --force && mix phx.server
           #wait-on: 'http://localhost:5000'
           #attach-workspace: true
