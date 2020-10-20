@@ -91,11 +91,6 @@ commands:
 # -------------------
 jobs: 
 
-  check: 
-    executor: arvore
-    steps:
-        - run: echo "OK"
-        - run: mix
   # -------------------
   #  server_build
   # -------------------
@@ -189,15 +184,14 @@ jobs:
 workflows:
   build:
     jobs:
-      - check
-      # - server_build
-      # - cypress/run:
-      #     executor:
-      #       arvore
-      #     attach-workspace: true
-      #     requires:
-      #       - server_build
-      #     start: mix local.hex --force && mix local.rebar --force && mix phx.server
-      #     wait-on: 'http://localhost:5000'
+      - server_build
+      - cypress/run:
+          executor:
+            arvore
+          attach-workspace: true
+          requires:
+            - server_build
+          start: mix local.hex --force && mix local.rebar --force && mix phx.server
+          wait-on: 'http://localhost:5000'
           
           
