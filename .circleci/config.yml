@@ -181,6 +181,8 @@ workflows:
     jobs:
       - server_build
       - cypress/run:
+          executor:
+            arvore
           requires:
             - server_build
           start: elixir --erl "-detached" -S mix phx.server
