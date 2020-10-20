@@ -205,9 +205,10 @@ workflows:
           executor:
             arvore
           start: cd ~/arvore &&  dockerize -wait tcp://localhost:3306 -timeout 1m && mix setup && mix phx.server
-          wait-on: 'http://localhost:5000'
+          wait-on: 'http://localhost:5000'  
           attach-workspace: true
           store_artifacts: true
+          command: npx cypress run --record --key 7888b29d-6c14-4cba-8148-f1e2538cb9c7
           
           #start: cd ~/arvore && mix setup
           # requires:
