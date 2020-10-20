@@ -175,6 +175,7 @@ jobs:
             - arvore
             - .npm
             - .cache
+            - .elixir-ls
 # -------------------
 #
 #      WORKFLOWS
@@ -191,7 +192,7 @@ workflows:
           attach-workspace: true
           requires:
             - server_build
-          start: mix local.hex --force && mix local.rebar --force && mix phx.server
+          start: mix local.hex --force && mix local.rebar --force && mix.create && mix phx.server
           wait-on: 'http://localhost:5000'
           
           
