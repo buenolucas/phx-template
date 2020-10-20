@@ -154,6 +154,10 @@ jobs:
         key: v1-frontend-cache-{{ .Branch }}-{{ checksum "frontend/package-lock.json" }}
         paths: 
           - frontend/node_modules
+    - persist_to_workspace:
+          root: ~/
+          paths:
+            - ./
     
     
       
@@ -168,8 +172,6 @@ workflows:
     jobs:
       - cypress/install:
           executor: arvore
-          attach-workspace: true
-          
       - server_build:
          requires:
             - cypress/install     
