@@ -28,7 +28,7 @@ orbs:
 #
 # -------------------
 executors:
-    arvorearvore:
+    arvore:
       <<: *defaults
       docker:
         - image: buenolucasbr/cimg-phx
