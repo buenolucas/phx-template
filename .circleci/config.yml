@@ -45,7 +45,11 @@ executors:
 #
 # -------------------
 
-commands: 
+commands:
+  
+  setup_server: 
+      steps:
+         - run: echo "Setuppppp"
   # -------------------------
   #  instlal app
   # -------------------------
@@ -185,12 +189,12 @@ jobs:
 workflows:
   build:
     jobs:
-      - server_build
+      #- server_build
       - cypress/run:
           executor:
             arvore
           attach-workspace: true
-          start: mix
+          start: setup_server
           # requires:
           #   - server_build
           # start: mix local.hex --force && \
