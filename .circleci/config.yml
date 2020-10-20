@@ -33,7 +33,7 @@ executors:
     arvore:
       <<: *defaults
       docker:
-        - image: cimg/elixir:1.10.4-node
+        - image: cimg/elixir:1.10.4-no  de
         - image: circleci/mysql:8.0.17
           command: --default-authentication-plugin=mysql_native_password --sql-mode="NO_ENGINE_SUBSTITUTION"
 
@@ -168,7 +168,8 @@ workflows:
     jobs:
       - cypress/install:
           executor: arvore
-
+          attach-workspace: true
+          
       - server_build:
          requires:
             - cypress/install     
