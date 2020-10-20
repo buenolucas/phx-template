@@ -167,10 +167,12 @@ workflows:
   build:
     jobs:
       - cypress/install:
-          attach-workspace: true
+          executor: arvore
+          no-workspace: false
+          
       - server_build:
          requires:
-            - cypress/install        
+            - cypress/install     
       - cypress/run:
           requires:
             - server_build
