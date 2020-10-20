@@ -172,7 +172,6 @@ workflows:
           requires:
             - cypress/install
             - server_build
-          attach-workspace: true
           start: elixir --erl "-detached" -S mix phx.server
           wait-on: 'http://localhost:5000'
           
