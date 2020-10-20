@@ -120,7 +120,7 @@ jobs:
         command: dockerize -wait tcp://localhost:3306 -timeout 1m
 
     - run: mix ecto.create
-    - run: mix ecto.load
+    #- run: mix ecto.load
     - run: mix ecto.migrate
     
     #
@@ -162,6 +162,7 @@ jobs:
           paths:
             - .cache
             - .npm
+            - .elixir_ls
             - arvore
     
     
