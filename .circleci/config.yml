@@ -205,6 +205,7 @@ workflows:
           executor:
             arvore
           start: cd ~/arvore &&  dockerize -wait tcp://localhost:3306 -timeout 1m && mix setup && mix phx.server
+          wait-on: 'http://localhost:5000'
           attach-workspace: true
           store_artifacts: true
           
