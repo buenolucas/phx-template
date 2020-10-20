@@ -98,6 +98,7 @@ jobs:
         at: ~/
     - run: mix local.hex --force
     - run: mix local.rebar --force
+    
     #
     # app install
     #
