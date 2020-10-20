@@ -168,8 +168,7 @@ workflows:
     jobs:
       - cypress/install:
           executor: arvore
-          no-workspace: false
-          
+
       - server_build:
          requires:
             - cypress/install     
