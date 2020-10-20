@@ -167,10 +167,11 @@ workflows:
   build:
     jobs:
       - cypress/install
-      - server_build          
+      - server_build:
+         requires:
+            - cypress/install        
       - cypress/run:
           requires:
-            - cypress/install
             - server_build
           start: elixir --erl "-detached" -S mix phx.server
           wait-on: 'http://localhost:5000'
