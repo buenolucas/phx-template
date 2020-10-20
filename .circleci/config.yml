@@ -195,7 +195,7 @@ workflows:
             arvore
           requires:
             - server_build
-          start: mix phx.server
-          wait-on: 'http://localhost:5000'
+          #start: mix phx.server
+          #wait-on: 'http://localhost:5000'
           attach-workspace: true
           
