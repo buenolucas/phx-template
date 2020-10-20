@@ -198,18 +198,13 @@ jobs:
 workflows:
   build:
     jobs:
-      
       - server_build
-      - check:
-          requires:
-            - server_build
       - cypress/run:
           requires:
             - server_build
           executor:
             arvore
-          
-          start: cd ~/arvore && mix setup
+          start: cd ~/arvore &&  dockerize -wait tcp://localhost:3306 -timeout 1m && mix setup && mix phx.server
           attach-workspace: true
           store_artifacts: true
           #start: cd ~/arvore && mix setup
