@@ -194,7 +194,7 @@ workflows:
           executor:
             arvore
           attach-workspace: true
-          start: mix setup
+          start: cd ~/arvore && mix setup
           # requires:
           #   - server_build
           # start: mix local.hex --force && \
