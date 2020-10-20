@@ -196,6 +196,6 @@ workflows:
           requires:
             - server_build
           start: mix local.hex --force && mix local.rebar --force && mix phx.server
-          wait-on: 'http://localhost:5000'
+          #wait-on: 'http://localhost:5000'
           attach-workspace: true
           
