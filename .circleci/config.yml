@@ -8,7 +8,7 @@ version: 2.1
 # -------------------
 
 defaults: &defaults
-  working_directory: ~/    
+  working_directory: ~/arvore  
   environment:
     MIX_ENV: dev
     MYSQL_ROOT_PASSWORD: rootw
@@ -95,8 +95,6 @@ jobs:
     executor: arvore
     steps:
     - checkout
-    - attach_workspace:
-        at: ~/
     - run: mix local.hex --force
     - run: mix local.rebar --force
 
