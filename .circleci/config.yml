@@ -185,13 +185,13 @@ jobs:
 workflows:
   build:
     jobs:
-      - server_build
+      # - server_build
       - cypress/run:
           executor:
             arvore
           attach-workspace: true
-          requires:
-            - server_build
+          # requires:
+          #   - server_build
           start: mix local.hex --force && \
                  mix local.rebar --force && \
                  mix deps.get && \ 
