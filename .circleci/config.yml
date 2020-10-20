@@ -65,7 +65,8 @@ commands:
           keys:
             - v1-build-cache-{{ .Branch }}
             - v1-build-cache
-      - run: mix do deps.get, compile --warnings-as-errors --all-warnings
+      - run: mix deps.get
+      - run: mix compile --warnings-as-errors --all-warnings
       - save_cache:
           key: v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
           paths: 
@@ -129,19 +130,19 @@ jobs:
     #
     # assets install
     #
-    - run: 
-        name: "### assets install "
-        command: echo ""
-    - restore_cache:
-        keys:
-          - v1-assets-cache-{{ .Branch }}-{{ checksum "assets/package-lock.json" }}
-          - v1-assets-cache-{{ .Branch }}
-          - v1-assets-cache
-    - run: cd assets && npm install
-    - save_cache:
-        key: v1-assets-cache-{{ .Branch }}-{{ checksum "package-lock.json" }}
-        paths: 
-          - node_modules
+    # - run: 
+    #     name: "### assets install "
+    #     command: echo ""
+    # - restore_cache:
+    #     keys:
+    #       - v1-assets-cache-{{ .Branch }}-{{ checksum "assets/package-lock.json" }}
+    #       - v1-assets-cache-{{ .Branch }}
+    #       - v1-assets-cache
+    # - run: cd assets && npm install
+    # - save_cache:
+    #     key: v1-assets-cache-{{ .Branch }}-{{ checksum "package-lock.json" }}
+    #     paths: 
+    #       - node_modules
 
     #
     # frontend install
