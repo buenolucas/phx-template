@@ -164,9 +164,9 @@ jobs:
     #
     #  Run Server
     #
-    - run:
-          name: Run Server
-          command: elixir --erl "-detached" -S mix phx.server
+    # - run:
+    #       name: Run Server
+    #       command: elixir --erl "-detached" -S mix phx.server
 
 
     #
@@ -195,7 +195,7 @@ workflows:
             arvore
           requires:
             - server_build
-          start: elixir --erl "-detached" -S mix phx.server
+          start: mix phx.server
           wait-on: 'http://localhost:5000'
           attach-workspace: true
           
