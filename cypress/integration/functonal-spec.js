@@ -5,7 +5,10 @@ describe("Should be fuck", () => {
   before(() => {});
 
   it("should gonna be yeah!", () => {
-    cy.visit("http://localhost:5000");
     expect(true).to.equal(true);
+
+    cy.visit("https://br.search.yahoo.com/");
+    cy.get("#yschsp").type("artilheiros do cruzeiro esporte clube");
+    cy.get("button[type='submit']").click();
   });
 });
