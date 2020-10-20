@@ -207,6 +207,7 @@ workflows:
           start: cd ~/arvore &&  dockerize -wait tcp://localhost:3306 -timeout 1m && mix setup && mix phx.server
           attach-workspace: true
           store_artifacts: true
+          
           #start: cd ~/arvore && mix setup
           # requires:
           #   - server_build
