@@ -147,19 +147,19 @@ jobs:
     #
     # frontend install
     #
-    # - run: 
-    #     name: "### frontend install "
-    #     command: echo ""
-    # - restore_cache:
-    #     keys:
-    #       - v1-frontend-cache-{{ .Branch }}-{{ checksum "frontend/package-lock.json" }}
-    #       - v1-frontend-cache-{{ .Branch }}
-    #       - v1-frontend-cache
-    # - run: cd frontend && npm install
-    # - save_cache:
-    #     key: v1-frontend-cache-{{ .Branch }}-{{ checksum "frontend/package-lock.json" }}
-    #     paths: 
-    #       - frontend/node_modules
+    - run: 
+        name: "### frontend install "
+        command: echo ""
+    - restore_cache:
+        keys:
+          - v1-frontend-cache-{{ .Branch }}-{{ checksum "frontend/package-lock.json" }}
+          - v1-frontend-cache-{{ .Branch }}
+          - v1-frontend-cache
+    - run: cd frontend && npm install
+    - save_cache:
+        key: v1-frontend-cache-{{ .Branch }}-{{ checksum "frontend/package-lock.json" }}
+        paths: 
+          - frontend/node_modules
     
     #
     #  Run Server
