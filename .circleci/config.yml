@@ -1,6 +1,4 @@
 version: 2.1
-
-
 # -------------------
 #
 #       DEFAULTS
@@ -24,14 +22,13 @@ defaults: &defaults
 orbs:
   cypress: cypress-io/cypress@1
 
-
 # -------------------
 #
 #      EXECUTORS
 #
 # -------------------
 executors:
-    arvore:
+    arvorearvore:
       <<: *defaults
       docker:
         - image: buenolucasbr/cimg-phx
@@ -93,6 +90,12 @@ commands:
 #
 # -------------------
 jobs: 
+
+  check: 
+    executor: arvore
+    steps:
+        - run: echo "OK"
+        - run: mix
   # -------------------
   #  server_build
   # -------------------
@@ -175,7 +178,8 @@ jobs:
           root: ~/
           paths:
             - arvore
-      
+            - .npm
+            - .cache
 # -------------------
 #
 #      WORKFLOWS
@@ -185,14 +189,15 @@ jobs:
 workflows:
   build:
     jobs:
-      - server_build
-      - cypress/run:
-          executor:
-            arvore
-          attach-workspace: true
-          requires:
-            - server_build
-          start: mix local.hex --force && mix local.rebar --force && mix phx.server
-          wait-on: 'http://localhost:5000'
+      - check
+      # - server_build
+      # - cypress/run:
+      #     executor:
+      #       arvore
+      #     attach-workspace: true
+      #     requires:
+      #       - server_build
+      #     start: mix local.hex --force && mix local.rebar --force && mix phx.server
+      #     wait-on: 'http://localhost:5000'
           
           
