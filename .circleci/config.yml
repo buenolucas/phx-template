@@ -130,36 +130,36 @@ jobs:
     #
     # assets install
     #
-    # - run: 
-    #     name: "### assets install "
-    #     command: echo ""
-    # - restore_cache:
-    #     keys:
-    #       - v1-assets-cache-{{ .Branch }}-{{ checksum "assets/package-lock.json" }}
-    #       - v1-assets-cache-{{ .Branch }}
-    #       - v1-assets-cache
-    # - run: cd assets && npm install
-    # - save_cache:
-    #     key: v1-assets-cache-{{ .Branch }}-{{ checksum "package-lock.json" }}
-    #     paths: 
-    #       - node_modules
+    - run: 
+        name: "### assets install "
+        command: echo ""
+    - restore_cache:
+        keys:
+          - v1-assets-cache-{{ .Branch }}-{{ checksum "assets/package-lock.json" }}
+          - v1-assets-cache-{{ .Branch }}
+          - v1-assets-cache
+    - run: cd assets && npm install
+    - save_cache:
+        key: v1-assets-cache-{{ .Branch }}-{{ checksum "package-lock.json" }}
+        paths: 
+          - node_modules
 
     #
     # frontend install
     #
-    - run: 
-        name: "### frontend install "
-        command: echo ""
-    - restore_cache:
-        keys:
-          - v1-frontend-cache-{{ .Branch }}-{{ checksum "frontend/package-lock.json" }}
-          - v1-frontend-cache-{{ .Branch }}
-          - v1-frontend-cache
-    - run: cd frontend && npm install
-    - save_cache:
-        key: v1-frontend-cache-{{ .Branch }}-{{ checksum "frontend/package-lock.json" }}
-        paths: 
-          - frontend/node_modules
+    # - run: 
+    #     name: "### frontend install "
+    #     command: echo ""
+    # - restore_cache:
+    #     keys:
+    #       - v1-frontend-cache-{{ .Branch }}-{{ checksum "frontend/package-lock.json" }}
+    #       - v1-frontend-cache-{{ .Branch }}
+    #       - v1-frontend-cache
+    # - run: cd frontend && npm install
+    # - save_cache:
+    #     key: v1-frontend-cache-{{ .Branch }}-{{ checksum "frontend/package-lock.json" }}
+    #     paths: 
+    #       - frontend/node_modules
     
     #
     #  Run Server
@@ -175,9 +175,6 @@ jobs:
     - persist_to_workspace:
           root: ~/
           paths:
-            - .cache
-            - .npm
-            - .elixir_ls
             - arvore
       
 # -------------------
