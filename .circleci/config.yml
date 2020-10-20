@@ -160,9 +160,18 @@ jobs:
         key: v1-frontend-cache-{{ .Branch }}-{{ checksum "frontend/package-lock.json" }}
         paths: 
           - frontend/node_modules
+    
+    #
+    #  Run Server
+    #
     - run:
-          name: Sun Server
+          name: Run Server
           command: elixir --erl "-detached" -S mix phx.server
+
+
+    #
+    # persisit
+    #
     - persist_to_workspace:
           root: ~/
           paths:
