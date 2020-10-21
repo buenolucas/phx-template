@@ -50,6 +50,7 @@ commands:
   setup_server: 
       steps:
          - run: echo "Setuppppp"
+         
   # -------------------------
   #  instlal app
   # -------------------------
